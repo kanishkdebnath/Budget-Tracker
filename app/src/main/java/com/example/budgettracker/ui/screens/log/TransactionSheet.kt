@@ -8,7 +8,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
@@ -24,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,7 +59,13 @@ fun TransactionSheet(
     var dateMillis by remember { mutableStateOf(existing?.date ?: System.currentTimeMillis()) }
     var note by remember { mutableStateOf(existing?.note ?: "") }
     var showDatePicker by remember { mutableStateOf(false) }
+    var showCalculator by remember { mutableStateOf(false) }
     val parsedAmount = Money.parseToMinor(amountText)
+
+    // Default the category once the live list loads (the sheet may open before it arrives).
+    LaunchedEffect(categories) {
+        if (categoryId == null) categoryId = categories.firstOrNull()?.id
+    }
 
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(Modifier.padding(16.dp).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -64,6 +75,11 @@ fun TransactionSheet(
                 onValueChange = { amountText = it },
                 label = { Text("Amount") },
                 prefix = { Text(Money.symbolOf(currency)) },
+                trailingIcon = {
+                    IconButton(onClick = { showCalculator = true }) {
+                        Icon(Icons.Filled.Calculate, contentDescription = "Calculator")
+                    }
+                },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 isError = amountText.isNotBlank() && parsedAmount == null,
                 singleLine = true,
@@ -100,6 +116,15 @@ fun TransactionSheet(
             },
             dismissButton = { TextButton(onClick = { showDatePicker = false }) { Text("Cancel") } },
         ) { DatePicker(state = dateState) }
+    }
+
+    if (showCalculator) {
+        CalculatorDialog(
+            initial = amountText,
+            currency = currency,
+            onDismiss = { showCalculator = false },
+            onResult = { amountText = it },
+        )
     }
 }
 
