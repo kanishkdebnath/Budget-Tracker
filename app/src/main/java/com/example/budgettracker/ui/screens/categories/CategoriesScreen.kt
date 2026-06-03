@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -67,6 +68,8 @@ fun CategoriesScreen(
         // contentColorFor(Transparent) → Unspecified renders text black.
         containerColor = Color.Transparent,
         contentColor = MaterialTheme.colorScheme.onBackground,
+        // The app-level Scaffold already applies system-bar + top-bar insets; don't double them.
+        contentWindowInsets = WindowInsets(0),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             GradientFab("New", onClick = { sheet = CategoriesSheet.Chooser })
