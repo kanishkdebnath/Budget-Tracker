@@ -1,0 +1,117 @@
+package com.example.budgettracker.ui
+
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.example.budgettracker.domain.time.MonthUtils
+import com.example.budgettracker.ui.components.BackTopBar
+import com.example.budgettracker.ui.components.MonthNavTopBar
+import com.example.budgettracker.ui.components.SectionTopBar
+import com.example.budgettracker.ui.navigation.SETTINGS_ROUTE
+import com.example.budgettracker.ui.navigation.TopLevelDest
+import com.example.budgettracker.ui.screens.categories.CategoriesScreen
+import com.example.budgettracker.ui.screens.log.LogScreen
+import com.example.budgettracker.ui.screens.plan.PlanScreen
+import com.example.budgettracker.ui.screens.recurring.RecurringScreen
+import com.example.budgettracker.ui.screens.report.ReportScreen
+import com.example.budgettracker.ui.screens.settings.SettingsScreen
+import com.example.budgettracker.ui.theme.BudgetTrackerTheme
+import java.time.YearMonth
+import java.time.ZoneId
+
+private val MONTH_NAV_DESTS = setOf(TopLevelDest.LOG, TopLevelDest.PLAN, TopLevelDest.REPORT)
+
+@Composable
+fun BudgetApp() {
+    val navController = rememberNavController()
+    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+    val currentDest = TopLevelDest.fromRoute(currentRoute)
+
+    // Shared month (YYYY-MM) for Log/Plan/Report; feature ViewModels take this over in later phases.
+    var month by rememberSaveable {
+        mutableStateOf(MonthUtils.monthOf(System.currentTimeMillis(), ZoneId.systemDefault()))
+    }
+    val goToSettings = { navController.navigate(SETTINGS_ROUTE) { launchSingleTop = true } }
+
+    Scaffold(
+        topBar = {
+            when {
+                currentDest in MONTH_NAV_DESTS -> MonthNavTopBar(
+                    monthLabel = MonthUtils.monthLabel(month),
+                    onPreviousMonth = { month = YearMonth.parse(month).minusMonths(1).toString() },
+                    onNextMonth = { month = YearMonth.parse(month).plusMonths(1).toString() },
+                    onSettings = goToSettings,
+                )
+                currentDest == TopLevelDest.CATEGORIES -> SectionTopBar("Categories", goToSettings)
+                currentDest == TopLevelDest.RECURRING -> SectionTopBar("Recurring", goToSettings)
+                currentRoute == SETTINGS_ROUTE -> BackTopBar("Settings", onBack = { navController.popBackStack() })
+            }
+        },
+        bottomBar = {
+            if (currentRoute in TopLevelDest.routes) {
+                NavigationBar {
+                    TopLevelDest.entries.forEach { dest ->
+                        val selected = currentDest == dest
+                        NavigationBarItem(
+                            selected = selected,
+                            onClick = {
+                                navController.navigate(dest.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            },
+                            icon = {
+                                Icon(
+                                    if (selected) dest.filledIcon else dest.outlinedIcon,
+                                    contentDescription = dest.label,
+                                )
+                            },
+                            label = { Text(dest.label) },
+                        )
+                    }
+                }
+            }
+        },
+    ) { innerPadding ->
+        NavHost(
+            navController = navController,
+            startDestination = TopLevelDest.LOG.route,
+            modifier = Modifier.padding(innerPadding),
+        ) {
+            composable(TopLevelDest.LOG.route) { LogScreen(month) }
+            composable(TopLevelDest.PLAN.route) { PlanScreen(month) }
+            composable(TopLevelDest.REPORT.route) { ReportScreen(month) }
+            composable(TopLevelDest.CATEGORIES.route) { CategoriesScreen() }
+            composable(TopLevelDest.RECURRING.route) { RecurringScreen() }
+            composable(SETTINGS_ROUTE) { SettingsScreen() }
+        }
+    }
+}
+
+@Preview(name = "App — Light")
+@Composable
+private fun BudgetAppLightPreview() {
+    BudgetTrackerTheme(darkTheme = false) { BudgetApp() }
+}
+
+@Preview(name = "App — Dark")
+@Composable
+private fun BudgetAppDarkPreview() {
+    BudgetTrackerTheme(darkTheme = true) { BudgetApp() }
+}
