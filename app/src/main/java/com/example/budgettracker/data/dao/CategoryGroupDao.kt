@@ -3,6 +3,7 @@ package com.example.budgettracker.data.dao
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
 import com.example.budgettracker.data.entity.CategoryGroup
 import kotlinx.coroutines.flow.Flow
@@ -33,4 +34,13 @@ interface CategoryGroupDao {
 
     @Query("SELECT COUNT(*) FROM category_group")
     suspend fun count(): Int
+
+    @Query("UPDATE category_group SET `order` = :order, updatedAt = :updatedAt WHERE id = :id")
+    suspend fun setOrder(id: Long, order: Int, updatedAt: Long)
+
+    /** Persist a new global group order, atomically. */
+    @Transaction
+    suspend fun reorder(orderedIds: List<Long>, updatedAt: Long) {
+        orderedIds.forEachIndexed { index, id -> setOrder(id, index, updatedAt) }
+    }
 }

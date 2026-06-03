@@ -79,6 +79,15 @@ fun CategoriesScreen(
                     title = "Nothing here",
                     subtitle = "Add a category or group with the New button.",
                 )
+            } else if (filter == CategoryFilter.ALL) {
+                // Drag-to-reorder is only meaningful on the unfiltered list.
+                ReorderableSections(
+                    sections = sections,
+                    onReorderGroups = viewModel::reorderGroups,
+                    onReorderCategories = { _, ids -> viewModel.reorderCategories(ids) },
+                    onGroupClick = { sheet = CategoriesSheet.GroupForm(it) },
+                    onCategoryClick = { sheet = CategoriesSheet.CategoryForm(it, it.groupId) },
+                )
             } else {
                 LazyColumn(
                     contentPadding = PaddingValues(16.dp),
