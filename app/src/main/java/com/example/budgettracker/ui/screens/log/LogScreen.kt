@@ -32,6 +32,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.budgettracker.domain.time.MonthUtils
 import com.example.budgettracker.ui.AppViewModelProvider
 import com.example.budgettracker.ui.components.EmptyState
+import com.example.budgettracker.ui.components.GradientFab
 import com.example.budgettracker.ui.components.NetBand
 import kotlinx.coroutines.launch
 import java.time.ZoneId
@@ -58,11 +59,7 @@ fun LogScreen(
         modifier = modifier,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = { editingRow = null; showSheet = true },
-                icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                text = { Text("Add") },
-            )
+            GradientFab("Add", onClick = { editingRow = null; showSheet = true })
         },
     ) { padding ->
         Column(Modifier.padding(padding).fillMaxSize()) {

@@ -35,7 +35,7 @@ class PreferencesRepository(private val dataStore: DataStore<Preferences>) {
     companion object {
         const val DEFAULT_CURRENCY = "INR"
         const val DEFAULT_DENSITY = "comfortable"
-        const val DEFAULT_THEME_MODE = "system"
+        const val DEFAULT_THEME_MODE = "dark" // design is dark-first (matches the mockups)
         val CURRENCY = stringPreferencesKey("currency")
         val DENSITY = stringPreferencesKey("density")
         val THEME_MODE = stringPreferencesKey("theme_mode")

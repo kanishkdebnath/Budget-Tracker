@@ -1,6 +1,8 @@
 package com.example.budgettracker.domain.money
 
 import kotlin.math.abs
+import kotlin.math.floor
+import kotlin.math.roundToLong
 
 /**
  * Formats Long minor units (1/100 of the major unit) for display per PRODUCT_SPEC §9.
@@ -80,6 +82,27 @@ object Money {
     /** Plain editable major string for an amount field ("50000" -> "500", "50050" -> "500.50"). */
     fun toMajorInput(minor: Long): String =
         if (minor % 100 == 0L) (minor / 100).toString() else "${minor / 100}.${(minor % 100).toString().padStart(2, '0')}"
+
+    /** Short notation for hero surfaces (₹85k · ₹6.8k · ₹1.5L · ₹2.5Cr); full format below 1,000. */
+    fun formatShort(minor: Long, currency: String): String {
+        val fmt = FORMATS[currency]
+        val symbol = fmt?.symbol ?: "$currency "
+        val indian = fmt?.indianGrouping ?: false
+        val abs = abs(minor) / 100.0
+        val sign = if (minor < 0) "-" else ""
+        fun trim(v: Double): String {
+            val rounded = (v * 10).roundToLong() / 10.0
+            return if (rounded == floor(rounded)) rounded.toLong().toString() else rounded.toString()
+        }
+        return when {
+            indian && abs >= 10_000_000 -> "$sign$symbol${trim(abs / 10_000_000)}Cr"
+            indian && abs >= 100_000 -> "$sign$symbol${trim(abs / 100_000)}L"
+            !indian && abs >= 1_000_000_000 -> "$sign$symbol${trim(abs / 1_000_000_000)}B"
+            !indian && abs >= 1_000_000 -> "$sign$symbol${trim(abs / 1_000_000)}M"
+            abs >= 1_000 -> "$sign$symbol${trim(abs / 1_000)}k"
+            else -> format(minor, currency)
+        }
+    }
 
     /** Western grouping: a comma every 3 digits from the right (1,000,000). */
     private fun groupWestern(n: Long): String = insertSeparators(n.toString(), 3, 3)
