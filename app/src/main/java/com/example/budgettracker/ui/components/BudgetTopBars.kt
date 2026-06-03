@@ -12,8 +12,20 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarColors
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
+
+/** Transparent containers so the brand top-glow (see [BudgetBackground]) shows through the bar. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun transparentBarColors(): TopAppBarColors =
+    TopAppBarDefaults.topAppBarColors(
+        containerColor = Color.Transparent,
+        scrolledContainerColor = Color.Transparent,
+    )
 
 /** Month-nav top bar for Log / Plan / Report (design §5). */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -39,6 +51,7 @@ fun MonthNavTopBar(
         actions = {
             IconButton(onClick = onSettings) { Icon(Icons.Filled.Settings, contentDescription = "Settings") }
         },
+        colors = transparentBarColors(),
     )
 }
 
@@ -51,6 +64,7 @@ fun SectionTopBar(title: String, onSettings: () -> Unit) {
         actions = {
             IconButton(onClick = onSettings) { Icon(Icons.Filled.Settings, contentDescription = "Settings") }
         },
+        colors = transparentBarColors(),
     )
 }
 
@@ -65,5 +79,6 @@ fun BackTopBar(title: String, onBack: () -> Unit) {
             }
         },
         title = { Text(title, style = MaterialTheme.typography.titleLarge) },
+        colors = transparentBarColors(),
     )
 }
