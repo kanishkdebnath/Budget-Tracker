@@ -15,6 +15,9 @@ This is an **offline-first personal budgeting Android app**, and it is at the **
 
 Uses the Gradle wrapper (Gradle 9.4.1). Single module `:app`.
 
+> **No system JDK is installed** — every Gradle invocation needs `JAVA_HOME` pointed at Android Studio's bundled JBR:
+> `export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"` (JBR 21). Without it, `gradlew` fails with "Unable to locate a Java Runtime."
+
 ```bash
 ./gradlew assembleDebug              # build debug APK
 ./gradlew installDebug               # build + install on a connected device/emulator
@@ -24,11 +27,11 @@ Uses the Gradle wrapper (Gradle 9.4.1). Single module `:app`.
 ./gradlew connectedAndroidTest       # instrumented tests on a device (src/androidTest)
 ```
 
-Run a single unit test (wildcards allowed):
+Run a single unit test (wildcards allowed). The `--tests` filter needs the concrete task `:app:testDebugUnitTest` — the `test` aggregate rejects `--tests`:
 
 ```bash
-./gradlew test --tests "com.example.budgettracker.ExampleUnitTest"
-./gradlew test --tests "*.someTestMethod"
+./gradlew :app:testDebugUnitTest --tests "com.example.budgettracker.domain.money.MoneyTest"
+./gradlew :app:testDebugUnitTest --tests "*.someTestMethod"
 ```
 
 Pure-logic code (money/month/narrative/report aggregation per `PRODUCT_SPEC §7`, `§9`) should be JVM-unit-testable in `src/test` without an emulator — keep it free of Android framework deps so it stays there.
@@ -37,7 +40,7 @@ Pure-logic code (money/month/narrative/report aggregation per `PRODUCT_SPEC §7`
 
 Kotlin 2.2.10 · AGP 9.2.1 · Compose BOM 2026.02.01 · Material 3 · `minSdk 24`, `target/compileSdk 36`, JVM target 11. Dependencies are managed via the version catalog `gradle/libs.versions.toml` — **add libraries there**, then reference `libs.*` in `app/build.gradle.kts` (don't hardcode coordinates).
 
-> **`java.time` + minSdk 24:** the design recommends API 26 so `java.time` (`YearMonth`/`ZoneId`, used for all month math) works natively. The build targets `minSdk 24`, so before using `java.time` you must enable **core-library desugaring** (`isCoreLibraryDesugaringEnabled = true` + the desugar JDK dependency) — or raise `minSdk` to 26. Resolve this when you start the data/domain layer.
+> **`java.time` + minSdk 24:** all month math uses `java.time` (`YearMonth`/`ZoneId`), which is API 26+. The build targets `minSdk 24`, so **core-library desugaring is enabled** (`isCoreLibraryDesugaringEnabled = true` + `coreLibraryDesugaring(libs.desugar.jdk.libs)` in `app/build.gradle.kts`). Keep it on; `java.time` is safe to use throughout.
 
 ## Planned architecture (from `PRODUCT_SPEC §11`)
 
