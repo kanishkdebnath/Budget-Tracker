@@ -61,6 +61,8 @@ fun BudgetApp() {
     BudgetBackground {
         Scaffold(
             containerColor = Color.Transparent,
+            // contentColorFor(Transparent) is Unspecified → text would render black; pin it.
+            contentColor = MaterialTheme.colorScheme.onBackground,
             topBar = {
                 when {
                     currentDest in MONTH_NAV_DESTS -> MonthNavTopBar(
