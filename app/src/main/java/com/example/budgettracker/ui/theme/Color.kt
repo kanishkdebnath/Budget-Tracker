@@ -31,6 +31,14 @@ val LightInverseSurface = Color(0xFF2B3238)
 val LightInverseOnSurface = Color(0xFFEFF4F7)
 val LightInversePrimary = Color(0xFF9CC8DE)
 val LightScrim = Color(0xFF000000)
+// Cool blue-gray surface-container ramp (lowest=lightest) so light surfaces stay neutral, not warm.
+val LightSurfaceContainerLowest = Color(0xFFFFFFFF)
+val LightSurfaceContainerLow = Color(0xFFF7FAFB)
+val LightSurfaceContainer = Color(0xFFF1F5F7)
+val LightSurfaceContainerHigh = Color(0xFFEBF0F2)
+val LightSurfaceContainerHighest = Color(0xFFE6ECEE)
+val LightSurfaceBright = Color(0xFFFFFFFF)
+val LightSurfaceDim = Color(0xFFD9E1E5)
 
 // ---- Dark theme roles (design §3.1, first-class) ----
 val DarkPrimary = Color(0xFF9CC8DE)
@@ -61,6 +69,15 @@ val DarkInverseSurface = Color(0xFFE0E7EC)
 val DarkInverseOnSurface = Color(0xFF2B3238)
 val DarkInversePrimary = Color(0xFF0D2736)
 val DarkScrim = Color(0xFF000000)
+// Navy surface-container ramp (low→high = darker→lighter). M3's baseline defaults render brown in a
+// navy scheme; these keep sheets/menus/cards navy. Mirrors the design bg / surface / surface-2/3.
+val DarkSurfaceContainerLowest = Color(0xFF0A1218)
+val DarkSurfaceContainerLow = Color(0xFF11191F)
+val DarkSurfaceContainer = Color(0xFF151E25)
+val DarkSurfaceContainerHigh = Color(0xFF1A2229)
+val DarkSurfaceContainerHighest = Color(0xFF243038)
+val DarkSurfaceBright = Color(0xFF243038)
+val DarkSurfaceDim = Color(0xFF0A1218)
 
 // ---- Semantic signal colors (fixed, never confused with brand chrome; §3.1) ----
 val IncomeLight = Color(0xFF1F7A5A)
