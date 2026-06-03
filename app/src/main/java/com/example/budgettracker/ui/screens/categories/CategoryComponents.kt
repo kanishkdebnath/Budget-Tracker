@@ -14,18 +14,30 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.budgettracker.data.entity.Category
 import com.example.budgettracker.data.entity.Kind
+import com.example.budgettracker.domain.report.inferGroupKind
+import com.example.budgettracker.ui.components.BudgetCard
 import com.example.budgettracker.ui.theme.BudgetTheme
 
 /** Seed group colors as hex (design §3.1 / PRODUCT_SPEC §6.7) — used by the color pickers. */
@@ -71,6 +83,71 @@ fun CategoryFilterChips(selected: CategoryFilter, onSelect: (CategoryFilter) -> 
     }
 }
 
+/** Search field shown when the top-bar search icon is toggled on; auto-focuses on appear. */
+@Composable
+fun CategorySearchField(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    onClose: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val focusRequester = remember { FocusRequester() }
+    OutlinedTextField(
+        value = query,
+        onValueChange = onQueryChange,
+        modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp).focusRequester(focusRequester),
+        placeholder = { Text("Search categories") },
+        leadingIcon = { Icon(Icons.Outlined.Search, contentDescription = null) },
+        trailingIcon = { IconButton(onClick = onClose) { Icon(Icons.Outlined.Close, contentDescription = "Close search") } },
+        singleLine = true,
+    )
+    LaunchedEffect(Unit) { focusRequester.requestFocus() }
+}
+
+/**
+ * Group header: dot + name (expanding) + a group Kind chip + category count, then an optional
+ * [trailing] slot (drag handle) pinned right. Kind/count are hidden for an empty group.
+ */
+@Composable
+fun GroupHeaderRow(
+    section: GroupSection,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    trailing: @Composable () -> Unit = {},
+) {
+    Row(modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            Modifier.weight(1f).clickable(onClick = onClick).padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            ColorDot(parseHexColor(section.group.color))
+            Spacer(Modifier.width(12.dp))
+            Text(
+                section.group.name,
+                style = MaterialTheme.typography.titleMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f),
+            )
+            if (section.categories.isNotEmpty()) {
+                Spacer(Modifier.width(8.dp))
+                KindChip(inferGroupKind(section.categories))
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    section.categories.size.toString(),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            if (section.group.archived) {
+                Spacer(Modifier.width(8.dp))
+                Text("Archived", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+        trailing()
+    }
+}
+
 @Composable
 fun GroupCard(
     section: GroupSection,
@@ -79,19 +156,9 @@ fun GroupCard(
     modifier: Modifier = Modifier,
 ) {
     val groupColor = parseHexColor(section.group.color)
-    Card(modifier.fillMaxWidth()) {
+    BudgetCard(modifier) {
         Column(Modifier.padding(vertical = 4.dp)) {
-            Row(
-                Modifier.fillMaxWidth().clickable(onClick = onGroupClick).padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                ColorDot(groupColor)
-                Spacer(Modifier.width(12.dp))
-                Text(section.group.name, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-                if (section.group.archived) {
-                    Text("Archived", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-            }
+            GroupHeaderRow(section, onClick = onGroupClick)
             section.categories.forEach { category ->
                 CategoryRow(category, groupColor) { onCategoryClick(category) }
             }
@@ -116,6 +183,5 @@ private fun CategoryRow(category: Category, groupColor: Color, onClick: () -> Un
         ColorDot(category.color?.let { parseHexColor(it) } ?: groupColor, size = 10.dp)
         Spacer(Modifier.width(12.dp))
         Text(category.name, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-        KindChip(category.kind)
     }
 }

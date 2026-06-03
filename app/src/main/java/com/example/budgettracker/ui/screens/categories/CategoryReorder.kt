@@ -15,11 +15,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.DragHandle
-import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import com.example.budgettracker.ui.components.BudgetCard
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -97,20 +97,16 @@ private fun ReorderableGroupCard(
     var cats by remember(section.group.id) { mutableStateOf(section.categories) }
     LaunchedEffect(section.categories) { cats = section.categories }
 
-    Card(Modifier.fillMaxWidth()) {
+    BudgetCard(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(vertical = 4.dp)) {
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Row(
-                    Modifier.weight(1f).clickable(onClick = onGroupClick).padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    ColorDot(groupColor)
-                    Spacer(Modifier.width(12.dp))
-                    Text(section.group.name, style = MaterialTheme.typography.titleMedium)
-                }
-                dragHandle()
-                Spacer(Modifier.width(8.dp))
-            }
+            GroupHeaderRow(
+                section,
+                onClick = onGroupClick,
+                trailing = {
+                    dragHandle()
+                    Spacer(Modifier.width(8.dp))
+                },
+            )
 
             if (cats.isEmpty()) {
                 Text(
@@ -138,7 +134,6 @@ private fun ReorderableGroupCard(
                                     ColorDot(category.color?.let { parseHexColor(it) } ?: groupColor, size = 10.dp)
                                     Spacer(Modifier.width(12.dp))
                                     Text(category.name, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-                                    KindChip(category.kind)
                                 }
                                 IconButton(onClick = {}, modifier = Modifier.draggableHandle()) {
                                     Icon(Icons.Rounded.DragHandle, contentDescription = "Reorder category")

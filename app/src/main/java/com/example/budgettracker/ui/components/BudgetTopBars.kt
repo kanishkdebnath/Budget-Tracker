@@ -5,6 +5,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -55,13 +56,16 @@ fun MonthNavTopBar(
     )
 }
 
-/** Titled top bar for Categories / Recurring, with the Settings gear. */
+/** Titled top bar for Categories / Recurring, with an optional Search action + the Settings gear. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SectionTopBar(title: String, onSettings: () -> Unit) {
+fun SectionTopBar(title: String, onSettings: () -> Unit, onSearch: (() -> Unit)? = null) {
     TopAppBar(
         title = { Text(title, style = MaterialTheme.typography.titleLarge) },
         actions = {
+            if (onSearch != null) {
+                IconButton(onClick = onSearch) { Icon(Icons.Filled.Search, contentDescription = "Search") }
+            }
             IconButton(onClick = onSettings) { Icon(Icons.Filled.Settings, contentDescription = "Settings") }
         },
         colors = transparentBarColors(),
