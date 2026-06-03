@@ -4,12 +4,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project state — read this first
 
-This is an **offline-first personal budgeting Android app**, and it is at the **pre-implementation** stage:
+This is an **offline-first personal budgeting Android app**, being built in phases against a complete spec. **The spec is the source of truth**; cite section numbers when reasoning about behavior.
 
-- **The spec is the source of truth, not the code.** `app/src/main/.../MainActivity.kt` is still the Android Studio template ("Hello Android!" `Greeting`), and `ui/theme/Color.kt` / `Theme.kt` still hold the template's **Purple** palette with `dynamicColor = true`. None of the product features exist yet. When implementing, build against the specs below — and **replace** the template theme, don't extend it.
-- **`PRODUCT_SPEC.md`** is the authoritative product/data spec (features F1–F8, the 5-entity Room model, business logic, export format, currency rules). Cite section numbers (e.g. "F5.4", "§7.1") when reasoning about behavior.
-- **`docs/superpowers/specs/2026-06-03-budget-tracker-design-system-design.md`** is the approved design system (color tokens, type scale, shapes, gradients, per-screen composition). It maps tokens → Compose (`§7.1`).
-- **`docs/design-system/{foundations,components,screens}.html`** are the visual reference. Open in a browser; the CSS gradient recipes copy 1:1 into Compose `Brush` calls.
+- **`PRODUCT_SPEC.md`** — authoritative product/data spec (features F1–F8, the 5-entity Room model, business logic, export format, currency rules; e.g. "F5.4", "§7.1").
+- **`docs/superpowers/specs/2026-06-03-budget-tracker-design-system-design.md`** — approved design system (tokens, type scale, shapes, gradients, per-screen composition; maps to Compose in `§7.1`).
+- **`docs/design-system/{foundations,components,screens}.html`** — visual reference; CSS gradient recipes copy 1:1 into Compose `Brush`.
+- **`docs/superpowers/plans/2026-06-03-implementation-roadmap.md`** — the 11-phase build roadmap. Each phase has its own `…/plans/2026-06-03-phase-N-*.md`.
+
+**Progress (phases merged to `main`):**
+
+- **Phase 1 ✅** — `domain/money/Money` (§9) and `domain/time/MonthUtils` (§7.1, incl. `instantForDay`). Pure Kotlin, fully unit-tested.
+- **Phase 2 ✅** — navy Material 3 theme under `ui/theme/` (navy `ColorScheme` light+dark, Inter typography + tabular `money` style, shapes, `BudgetGradients`, `BudgetSemanticColors` via `CompositionLocal`, `BudgetTrackerTheme` with `dynamicColor` default **false**). Inter is bundled in `res/font/`.
+- **Phase 3 ✅** — Room data layer under `data/`: 5 entities, DAOs (`Flow`), repositories (uniqueness/archive guards, atomic recurring apply + bulk target save), idempotent `DatabaseSeeder`, `PreferencesRepository` (DataStore), `AppContainer` (manual DI). `BudgetDatabase` v1, schema exported to `app/schemas/`.
+- **Next:** Phase 4 (app shell & navigation) — `MainActivity` is still the Android Studio template (`Greeting`) and `BudgetApplication`/seeder wiring is not yet hooked up; that lands in Phase 4.
 
 ## Build & test
 
@@ -36,22 +43,26 @@ Run a single unit test (wildcards allowed). The `--tests` filter needs the concr
 
 Pure-logic code (money/month/narrative/report aggregation per `PRODUCT_SPEC §7`, `§9`) should be JVM-unit-testable in `src/test` without an emulator — keep it free of Android framework deps so it stays there.
 
+> **DAO/Room tests run on the JVM via Robolectric** (`@RunWith(RobolectricTestRunner::class)` + `@Config(sdk = [34])`), using `Room.inMemoryDatabaseBuilder` + `runTest`. So `./gradlew test` covers the data layer too — **no emulator needed** for persistence logic. Only true UI/instrumented checks (screenshots, Espresso) need a device.
+
 ## Toolchain
 
-Kotlin 2.2.10 · AGP 9.2.1 · Compose BOM 2026.02.01 · Material 3 · `minSdk 24`, `target/compileSdk 36`, JVM target 11. Dependencies are managed via the version catalog `gradle/libs.versions.toml` — **add libraries there**, then reference `libs.*` in `app/build.gradle.kts` (don't hardcode coordinates).
+Kotlin 2.2.10 · AGP 9.2.1 · Compose BOM 2026.02.01 · Material 3 · Room 2.8.4 (KSP) · DataStore · coroutines · `minSdk 24`, `target/compileSdk 36`, JVM target 11. Dependencies are managed via the version catalog `gradle/libs.versions.toml` — **add libraries there**, then reference `libs.*` in `app/build.gradle.kts` (don't hardcode coordinates).
+
+> **AGP 9 built-in Kotlin + KSP:** AGP 9 bundles Kotlin and, by default, blocks third-party plugins (KSP/Room) from registering generated source sets via the `kotlin.sourceSets` DSL. `gradle.properties` sets `android.disallowKotlinSourceSets=false` to allow it — keep it.
 
 > **`java.time` + minSdk 24:** all month math uses `java.time` (`YearMonth`/`ZoneId`), which is API 26+. The build targets `minSdk 24`, so **core-library desugaring is enabled** (`isCoreLibraryDesugaringEnabled = true` + `coreLibraryDesugaring(libs.desugar.jdk.libs)` in `app/build.gradle.kts`). Keep it on; `java.time` is safe to use throughout.
 
-## Planned architecture (from `PRODUCT_SPEC §11`)
+## Architecture (from `PRODUCT_SPEC §11`)
 
-Target package layout under `com.example.budgettracker`:
+Package layout under `com.example.budgettracker`:
 
-- **`data`** — Room entities, DAOs (return `Flow`), repositories, DataStore (currency + density preference).
-- **`domain`** — report aggregation, deterministic narrative, money & month utilities. Plain Kotlin, unit-testable.
-- **`ui`** — Compose screens + per-screen `ViewModel` (`StateFlow`); `ui/theme` holds the design system.
-- **`export`** — Excel (Apache POI or a lighter XLSX writer) and PDF (`PdfDocument`/pdfbox-android) builders, run off the main thread.
+- **`data`** ✅ — Room entities (`data/entity`), DAOs returning `Flow` (`data/dao`), `BudgetDatabase` + converters + seeding (`data/db`), repositories (`data/repository`), `AppContainer` (manual DI), `OpResult` (guarded-write result).
+- **`domain`** ✅ (partial) — `money/Money`, `time/MonthUtils`. Report aggregation + deterministic narrative arrive in Phase 8. Plain Kotlin, unit-testable.
+- **`ui`** — `ui/theme` ✅ holds the design system; screens + per-screen `ViewModel` (`StateFlow`) arrive Phase 4+.
+- **`export`** — Excel + PDF builders, off the main thread (Phase 11).
 
-Reactive flow: DAOs expose `Flow` → ViewModel `StateFlow` → Compose. No manual refresh; edits reflect immediately (the local equivalent of query-cache invalidation).
+Reactive flow: DAOs expose `Flow` → repository → ViewModel `StateFlow` → Compose. No manual refresh; edits reflect immediately. **Repositories take a `now: () -> Long` provider** (default `System::currentTimeMillis`) so tests pin timestamps. **Name uniqueness (case-insensitive, among live items) is enforced in `CategoryRepository`, not a DB unique index** — Room can't express partial/case-insensitive unique indices, and a global one would wrongly block reusing an archived name. Multi-DAO writes use `RoomDatabase.withTransaction { }`.
 
 ## Invariants that bite if ignored
 
@@ -59,14 +70,14 @@ These are easy to get subtly wrong and are baked into the spec:
 
 - **Money is `Long` minor units** (paise/cents), range `0..1_000_000_000_000`. Never `Int` (overflows ~₹21M), never floating point — all arithmetic in `Long`. Currency is a single user preference, **not** stored per amount. Display via `formatMoney(minor, currency)` (`§9`): INR uses `en-IN` lakh/crore grouping, JPY has 0 decimals.
 - **Months are derived in the device's local timezone**, not UTC (`§7.1`) — a deliberate divergence from the pathforge web origin. Use `monthOf(epochMillis, zone)` and `monthRange("YYYY-MM", zone)` with `java.time`.
-- **The transaction table must be named `transactions`** (or `budget_transaction`) — `TRANSACTION` is a SQLite keyword (`§6` Room note).
-- **Recurring apply is manual and idempotent** (`§7.4`): reject if `!active` or `lastRunMonth == currentMonth`; the insert + `lastRunMonth` update happen in **one atomic Room `@Transaction`**. Bulk target save is likewise atomic. `dayOfMonth` is constrained to 1–28.
-- **Seed data runs once on first launch** (`§6.7`), guarded by "no groups exist" — idempotent.
+- **The transaction table is named `transactions`** (`TRANSACTION` is a SQLite keyword, `§6`); the entity class is `TransactionEntity` to avoid clashing with Room's `@Transaction`.
+- **Recurring apply is manual and idempotent** (`§7.4`, `RecurringRepository.apply`): reject if `!active` or `lastRunMonth == currentMonth`; the insert + `lastRunMonth` update run in one `withTransaction`. Bulk target save (`TargetRepository.bulkSave`) is likewise atomic. `dayOfMonth` is constrained to 1–28.
+- **Seed data runs once on first launch** (`§6.7`, `DatabaseSeeder.seedIfEmpty`), guarded by "no groups exist" — idempotent.
 - **Color is never the only signal:** deltas always carry a `+`/`−` sign prefix and qualifier text. The semantic `income` (green) / `overage` (red) colors stay **fixed even when dynamic color is on** — they're data, not chrome (design `§7.3`).
 
 ## Design system essentials
 
-- **Brand color `#0d2736` (deep navy)**, Material 3 Expressive, theme follows the OS. Color approach is **hybrid**: fixed navy palette by default, with a Settings toggle for Android-12+ dynamic color. (The template's current `dynamicColor = true` default contradicts this — fix when wiring the theme.)
+- **Brand color `#0d2736` (deep navy)**, Material 3 Expressive, theme follows the OS. Color approach is **hybrid**: fixed navy palette by default (`BudgetTrackerTheme(dynamicColor = false)`), with a Settings toggle for Android-12+ dynamic color (wired in Phase 10).
 - **Navigation:** bottom nav with **5 tabs** (Log · Plan · Report · Categories · Recurring) + a **Settings gear** in the top app bar. Six screens total.
 - **Font** Inter with **tabular numerals mandatory anywhere money appears**. Signature shapes: pill (FAB/CTA/active-nav) and 16dp card. Gradients are used **only** on surfaces/CTAs, **never on data**.
 - Full token tables (light + dark color schemes, type scale, spacing/radius, gradient recipes) live in the design spec `§3` and the `foundations.html` reference. Mirror them into `MaterialTheme.colorScheme`/`Typography`/`Shapes`; keep semantic `income`/`overage`/`expense` shortcuts in a sibling object via `CompositionLocalProvider` (design `§7.1`).
