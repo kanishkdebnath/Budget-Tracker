@@ -94,7 +94,7 @@ fun BudgetApp() {
             startDestination = TopLevelDest.LOG.route,
             modifier = Modifier.padding(innerPadding),
         ) {
-            composable(TopLevelDest.LOG.route) { LogScreen(month) }
+            composable(TopLevelDest.LOG.route) { LogScreen(month = month, onMonthChange = { month = it }) }
             composable(TopLevelDest.PLAN.route) { PlanScreen(month) }
             composable(TopLevelDest.REPORT.route) { ReportScreen(month) }
             composable(TopLevelDest.CATEGORIES.route) { CategoriesScreen() }

@@ -46,6 +46,26 @@ object Money {
         return "$sign$symbol$body"
     }
 
+    /** Display symbol for [currency] (e.g. "₹", "$"); unknown codes get a "CODE " prefix. */
+    fun symbolOf(currency: String): String = FORMATS[currency]?.symbol ?: "$currency "
+
+    private val AMOUNT_PATTERN = Regex("""^\d+(\.\d{1,2})?$""")
+
+    /**
+     * Parse user input (major units; optional grouping commas; up to 2 decimals) to Long minor units,
+     * or null if invalid (§F1.6). Rejects negatives, scientific notation, symbols, blank input, and
+     * amounts <= 0 or above the 10^12 ceiling.
+     */
+    fun parseToMinor(input: String): Long? {
+        val cleaned = input.trim().replace(",", "")
+        if (!AMOUNT_PATTERN.matches(cleaned)) return null
+        val parts = cleaned.split(".")
+        val whole = parts[0].toLongOrNull() ?: return null
+        val cents = if (parts.size > 1) parts[1].padEnd(2, '0').toInt() else 0
+        val minor = whole * 100 + cents
+        return if (minor in 1..1_000_000_000_000L) minor else null
+    }
+
     /** Western grouping: a comma every 3 digits from the right (1,000,000). */
     private fun groupWestern(n: Long): String = insertSeparators(n.toString(), 3, 3)
 

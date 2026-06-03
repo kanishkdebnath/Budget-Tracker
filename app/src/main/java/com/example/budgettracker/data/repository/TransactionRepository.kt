@@ -27,6 +27,14 @@ class TransactionRepository(
     suspend fun update(transaction: TransactionEntity) =
         transactionDao.update(transaction.copy(updatedAt = now()))
 
+    /** Edit a transaction's fields, preserving its createdAt. */
+    suspend fun edit(id: Long, date: Long, categoryId: Long, amount: Long, note: String?) {
+        val existing = transactionDao.getById(id) ?: return
+        transactionDao.update(
+            existing.copy(date = date, categoryId = categoryId, amount = amount, description = note, updatedAt = now()),
+        )
+    }
+
     /** Hard delete (§F1.4). */
     suspend fun delete(id: Long) = transactionDao.deleteById(id)
 }
