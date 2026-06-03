@@ -16,7 +16,8 @@ This is an **offline-first personal budgeting Android app**, being built in phas
 - **Phase 1 ✅** — `domain/money/Money` (§9) and `domain/time/MonthUtils` (§7.1, incl. `instantForDay`). Pure Kotlin, fully unit-tested.
 - **Phase 2 ✅** — navy Material 3 theme under `ui/theme/` (navy `ColorScheme` light+dark, Inter typography + tabular `money` style, shapes, `BudgetGradients`, `BudgetSemanticColors` via `CompositionLocal`, `BudgetTrackerTheme` with `dynamicColor` default **false**). Inter is bundled in `res/font/`.
 - **Phase 3 ✅** — Room data layer under `data/`: 5 entities, DAOs (`Flow`), repositories (uniqueness/archive guards, atomic recurring apply + bulk target save), idempotent `DatabaseSeeder`, `PreferencesRepository` (DataStore), `AppContainer` (manual DI). `BudgetDatabase` v1, schema exported to `app/schemas/`.
-- **Next:** Phase 4 (app shell & navigation) — `MainActivity` is still the Android Studio template (`Greeting`) and `BudgetApplication`/seeder wiring is not yet hooked up; that lands in Phase 4.
+- **Phase 4 ✅** — app shell under `ui/`: `BudgetApplication` (owns `AppContainer`, seeds on launch), `BudgetApp` (Scaffold + `NavigationBar` 5 tabs + `NavHost`), Settings via top-bar gear, shared month-nav top bar (`ui/components`), empty-state placeholder screens (`ui/screens/*`). `MainActivity` hosts `BudgetApp`.
+- **Next:** Phase 5 (Categories, F2) — replace the `CategoriesScreen` placeholder with real ViewModel-backed group/category CRUD, archive (with the live-categories guard), and drag-reorder, reading the Phase 3 repositories.
 
 ## Build & test
 
