@@ -39,4 +39,12 @@ class MonthUtilsTest {
     @Test fun monthLabelIsHumanReadable() {
         assertEquals("June 2026", MonthUtils.monthLabel("2026-06", Locale.ENGLISH))
     }
+
+    @Test fun instantForDayUsesLocalNineAm() {
+        val utcMillis = MonthUtils.instantForDay("2026-06", 5, utc)
+        assertEquals(Instant.parse("2026-06-05T09:00:00Z"), Instant.ofEpochMilli(utcMillis))
+        // 09:00 IST == 03:30 UTC
+        val istMillis = MonthUtils.instantForDay("2026-06", 5, kolkata)
+        assertEquals(Instant.parse("2026-06-05T03:30:00Z"), Instant.ofEpochMilli(istMillis))
+    }
 }

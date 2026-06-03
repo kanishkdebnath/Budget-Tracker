@@ -34,4 +34,13 @@ object MonthUtils {
         val ym = YearMonth.parse(month)
         return ym.format(DateTimeFormatter.ofPattern("MMMM yyyy", locale))
     }
+
+    /**
+     * Epoch millis for [dayOfMonth] of [month] at [hour] local time — the instant a recurring
+     * template's transaction is dated when applied (§7.4). [dayOfMonth] is 1–28.
+     */
+    fun instantForDay(month: String, dayOfMonth: Int, zone: ZoneId, hour: Int = 9): Long {
+        val ym = YearMonth.parse(month)
+        return ym.atDay(dayOfMonth).atTime(hour, 0).atZone(zone).toInstant().toEpochMilli()
+    }
 }
