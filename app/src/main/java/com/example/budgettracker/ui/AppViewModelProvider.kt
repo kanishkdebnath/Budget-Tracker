@@ -9,6 +9,7 @@ import com.example.budgettracker.ui.screens.log.LogViewModel
 import com.example.budgettracker.ui.screens.plan.PlanViewModel
 import com.example.budgettracker.ui.screens.recurring.RecurringViewModel
 import com.example.budgettracker.ui.screens.report.ReportViewModel
+import com.example.budgettracker.ui.screens.settings.SettingsViewModel
 
 /** Builds ViewModels from the [BudgetApplication] container (manual DI — no Hilt). */
 object AppViewModelProvider {
@@ -50,6 +51,10 @@ object AppViewModelProvider {
                 app.container.categoryRepository,
                 app.container.preferencesRepository,
             )
+        }
+        initializer {
+            val app = this[APPLICATION_KEY] as BudgetApplication
+            SettingsViewModel(app.container.preferencesRepository)
         }
     }
 }
