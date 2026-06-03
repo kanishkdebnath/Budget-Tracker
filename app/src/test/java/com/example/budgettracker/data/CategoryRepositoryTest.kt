@@ -53,4 +53,20 @@ class CategoryRepositoryTest {
         assertTrue(result is OpResult.Failure)
         assertEquals("Archive or move this group's categories first", (result as OpResult.Failure).reason)
     }
+
+    @Test
+    fun renameGroupOntoAnotherLiveNameIsRejected() = runTest {
+        repo.createGroup("Bills", "#EF4444", 0)
+        val other = repo.createGroup("Income", "#10B981", 1) as OpResult.Success
+        val group = db.categoryGroupDao().getById(other.id)!!
+        assertTrue(repo.updateGroup(group.copy(name = "bills")) is OpResult.Failure)
+    }
+
+    @Test
+    fun recolorKeepingOwnNameIsAllowed() = runTest {
+        val created = repo.createGroup("Bills", "#EF4444", 0) as OpResult.Success
+        val group = db.categoryGroupDao().getById(created.id)!!
+        assertTrue(repo.updateGroup(group.copy(color = "#000000")) is OpResult.Success)
+        assertEquals("#000000", db.categoryGroupDao().getById(created.id)?.color)
+    }
 }
