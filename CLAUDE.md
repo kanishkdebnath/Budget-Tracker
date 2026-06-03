@@ -74,3 +74,14 @@ These are easy to get subtly wrong and are baked into the spec:
 ## Conventions
 
 Commits follow **Conventional Commits** (`chore:`, `docs:`, `feat:`, …) — see `git log`. The design system was built iteratively as versioned HTML mockups (`v1`→`v15`); the `v*.png` screenshots and the `.superpowers/` / `.playwright-mcp/` working dirs are gitignored scratch, not deliverables.
+
+## Git workflow
+
+The GitHub remote is `origin` → `https://github.com/kanishkdebnath/Budget-Tracker`. `main` is the integration branch and must stay green.
+
+**All changes land via pull request — do not commit feature work directly to `main`:**
+
+1. Branch off `main` (`feat/...`, `fix/...`, `docs/...`, or `feat/phase-N-...` for a roadmap phase).
+2. Commit in bite-sized Conventional Commits; keep tests passing per commit.
+3. Push and open a PR: `gh pr create` (verify `./gradlew test` is green first).
+4. Merge the PR, then delete the branch. One roadmap phase = one branch = one PR.
