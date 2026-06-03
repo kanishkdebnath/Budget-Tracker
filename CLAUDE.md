@@ -23,7 +23,8 @@ This is an **offline-first personal budgeting Android app**, being built in phas
 - **Phase 8 ✅** — Report (F4): pure `domain/report/` (`aggregateReport` §7.2 + deterministic `generateNarrative` §7.3); `ui/screens/report/` — narrative box, actuals `NetBand` + planned caption, per-group Plan/Actual/Δ tables with color-coded deltas + Inc/Exp chips, recurring-due banner.
 - **Phase 9 ✅** — Recurring (F5): `ui/screens/recurring/` — `RecurringViewModel` (pure `buildRecurringRows`: applied/actionable/inactive classification + sort), Active/Inactive sections, 3-state cards (Apply / applied check-pill / inactive), create/edit sheet (scrollable) with active toggle, one-tap idempotent `apply` (§7.4) to the current month.
 - **Phase 10 ✅** — Settings (F7): `ui/screens/settings/` — `SettingsViewModel`, currency picker (common ISO list + custom code; retroactive reformat since all screens observe `PreferencesRepository.currency`), theme mode (System/Light/Dark) + dynamic-color toggle wired through `MainActivity` → `BudgetTrackerTheme`, About tiles.
-- **Next:** Phase 11 (Export, F6) — Excel (3-sheet xlsx, §8.1) + PDF (§8.2) export from the Report screen via the share sheet (decide POI vs a lighter writer). Density (design §7.2) is also still deferred.
+- **Phase 11 ✅** — Export (F6): `export/` — pure row builders, `ExcelExporter` (FastExcel, 3-sheet xlsx §8.1), `PdfExporter` (native `PdfDocument` §8.2), `ExportManager` (cache file + `FileProvider` share). Export buttons on the Report screen → Android share sheet (`budget-{month}-logs.xlsx` / `-report.pdf`). `ReportViewModel.exportBundle`.
+- **Status: F1–F8 complete.** Remaining work is polish/deferred items: density mode (design §7.2), PDF "Page X of Y" + embedded Noto Sans (§F6.4), and the §13 deferred-scope features (auto-apply recurring, sync, app-lock, widgets, charts).
 
 ## Build & test
 

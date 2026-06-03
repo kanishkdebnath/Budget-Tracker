@@ -13,6 +13,9 @@ import com.example.budgettracker.domain.report.ReportData
 import com.example.budgettracker.domain.report.ReportTotals
 import com.example.budgettracker.domain.report.aggregateReport
 import com.example.budgettracker.domain.report.generateNarrative
+import com.example.budgettracker.export.ExportBundle
+import com.example.budgettracker.export.buildExportRecurringRows
+import com.example.budgettracker.export.buildExportTxnRows
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -71,6 +74,26 @@ class ReportViewModel(
         val dueCount = recurring.count { it.active && it.lastRunMonth != scoped.month }
         ReportUiState(data, narrative, dueCount, currency, loaded = true)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ReportUiState.EMPTY)
+
+    /** Full data bundle for Excel/PDF export (§8). Null until a month's data has loaded. */
+    val exportBundle: StateFlow<ExportBundle?> = combine(
+        monthScoped,
+        categoryRepository.observeCategories(includeArchived = true),
+        categoryRepository.observeGroups(includeArchived = true),
+        recurringRepository.observeAll(),
+        currency,
+    ) { scoped, categories, groups, recurring, currency ->
+        val report = aggregateReport(scoped.transactions, scoped.targets, categories, groups)
+        val narrative = generateNarrative(scoped.month, report, currency, scoped.transactions.isNotEmpty())
+        ExportBundle(
+            month = scoped.month,
+            currency = currency,
+            narrative = narrative,
+            report = report,
+            transactions = buildExportTxnRows(scoped.transactions, categories.associateBy { it.id }, groups.associateBy { it.id }),
+            recurring = buildExportRecurringRows(recurring, scoped.month),
+        )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     fun setMonth(value: String) { month.value = value }
 }
