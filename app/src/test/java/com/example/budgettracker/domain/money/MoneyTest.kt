@@ -58,4 +58,22 @@ class MoneyTest {
     @Test fun negativeAmountPrefixesMinusBeforeSymbol() {
         assertEquals("-₹500.50", Money.format(-50050, "INR"))
     }
+
+    @Test fun parsesWholeAndGroupedAndDecimalInput() {
+        assertEquals(50000L, Money.parseToMinor("500"))
+        assertEquals(120000L, Money.parseToMinor("1,200"))
+        assertEquals(120050L, Money.parseToMinor("1200.50"))
+        assertEquals(120050L, Money.parseToMinor("1200.5"))
+        assertEquals(100000000L, Money.parseToMinor("10,00,000")) // Indian grouping input
+    }
+
+    @Test fun rejectsInvalidAmountInput() {
+        assertEquals(null, Money.parseToMinor(""))
+        assertEquals(null, Money.parseToMinor("0"))        // must be > 0
+        assertEquals(null, Money.parseToMinor("-5"))
+        assertEquals(null, Money.parseToMinor("1e3"))
+        assertEquals(null, Money.parseToMinor("₹5"))
+        assertEquals(null, Money.parseToMinor("1200.555")) // > 2 decimals
+        assertEquals(null, Money.parseToMinor("12.."))
+    }
 }
