@@ -66,6 +66,21 @@ object Money {
         return if (minor in 1..1_000_000_000_000L) minor else null
     }
 
+    /** Like [parseToMinor] but allows 0 (targets are >= 0, §F3.1). Blank/invalid -> null. */
+    fun parseTargetToMinor(input: String): Long? {
+        val cleaned = input.trim().replace(",", "")
+        if (!AMOUNT_PATTERN.matches(cleaned)) return null
+        val parts = cleaned.split(".")
+        val whole = parts[0].toLongOrNull() ?: return null
+        val cents = if (parts.size > 1) parts[1].padEnd(2, '0').toInt() else 0
+        val minor = whole * 100 + cents
+        return if (minor in 0..1_000_000_000_000L) minor else null
+    }
+
+    /** Plain editable major string for an amount field ("50000" -> "500", "50050" -> "500.50"). */
+    fun toMajorInput(minor: Long): String =
+        if (minor % 100 == 0L) (minor / 100).toString() else "${minor / 100}.${(minor % 100).toString().padStart(2, '0')}"
+
     /** Western grouping: a comma every 3 digits from the right (1,000,000). */
     private fun groupWestern(n: Long): String = insertSeparators(n.toString(), 3, 3)
 
