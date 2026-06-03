@@ -1,0 +1,54 @@
+package com.example.budgettracker.ui.theme
+
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+
+/**
+ * Gradient tokens (design §3.6). Gradients are used ONLY on surfaces/CTAs, NEVER on data.
+ * 135° gradients run top-left -> bottom-right (Offset.Zero -> Offset.Infinite);
+ * 180° gradients use the default vertical linearGradient.
+ */
+object BudgetGradients {
+
+    private val diagStart = Offset.Zero
+    private val diagEnd = Offset.Infinite
+
+    /** Net band hero — 135°. */
+    val NetBand = Brush.linearGradient(
+        colors = listOf(Color(0xFF1B4561), Color(0xFF143548), Color(0xFF0F2A3D)),
+        start = diagStart, end = diagEnd,
+    )
+
+    /** FAB — 135°. */
+    val Fab = Brush.linearGradient(
+        colors = listOf(Color(0xFF2A5E80), Color(0xFF1B4561), Color(0xFF143548)),
+        start = diagStart, end = diagEnd,
+    )
+
+    /** Tonal button / active bottom-nav pill — 180°. */
+    val TonalButton = Brush.verticalGradient(listOf(Color(0xFF1B4561), Color(0xFF143548)))
+
+    /** Filled (primary) button — 180°. */
+    val FilledButton = Brush.verticalGradient(listOf(Color(0xFFB0DDED), Color(0xFF9CC8DE)))
+
+    /** Card surfaces (txn / group / recurring / narrative / settings) — 180°, ~3% lift at top. */
+    val CardSurface = Brush.verticalGradient(listOf(Color(0xFF131A20), Color(0xFF0F1619)))
+
+    /** Info banner — 135°. */
+    val BannerInfo = Brush.linearGradient(
+        colors = listOf(Color(0xFF1B4561), Color(0xFF143548)),
+        start = diagStart, end = diagEnd,
+    )
+
+    /** Amber banner — 135°. */
+    val BannerAmber = Brush.linearGradient(
+        colors = listOf(Color(0xFF7B4520), Color(0xFF5C3013)),
+        start = diagStart, end = diagEnd,
+    )
+
+    /** Applied-recurring surface — green-tinted, 180°. */
+    val AppliedRecurring = Brush.verticalGradient(
+        listOf(Color(0x1A74D9B5), Color(0x0A74D9B5)),
+    )
+}
