@@ -89,6 +89,9 @@ class CategoriesViewModel(private val repository: CategoryRepository) : ViewMode
         report(repository.createCategory(groupId, name, kind, color, order))
     }
 
+    fun reorderGroups(orderedIds: List<Long>) = viewModelScope.launch { repository.reorderGroups(orderedIds) }
+    fun reorderCategories(orderedIds: List<Long>) = viewModelScope.launch { repository.reorderCategories(orderedIds) }
+
     fun updateGroup(group: CategoryGroup) = viewModelScope.launch { report(repository.updateGroup(group)) }
     fun updateCategory(category: Category) = viewModelScope.launch { report(repository.updateCategory(category)) }
     fun archiveGroup(groupId: Long) = viewModelScope.launch { report(repository.archiveGroup(groupId)) }

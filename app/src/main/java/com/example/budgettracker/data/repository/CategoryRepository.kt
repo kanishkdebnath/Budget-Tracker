@@ -83,4 +83,10 @@ class CategoryRepository(
         categoryDao.update(category.copy(name = trimmed, updatedAt = now()))
         return OpResult.Success(category.id)
     }
+
+    /** Persist a new global group order (§F2.6). */
+    suspend fun reorderGroups(orderedGroupIds: List<Long>) = groupDao.reorder(orderedGroupIds, now())
+
+    /** Persist a new order for categories within a group (§F2.6). */
+    suspend fun reorderCategories(orderedCategoryIds: List<Long>) = categoryDao.reorder(orderedCategoryIds, now())
 }

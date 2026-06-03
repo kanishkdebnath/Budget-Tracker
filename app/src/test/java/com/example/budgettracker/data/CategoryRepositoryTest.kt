@@ -5,6 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.example.budgettracker.data.db.BudgetDatabase
 import com.example.budgettracker.data.entity.Kind
 import com.example.budgettracker.data.repository.CategoryRepository
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -68,5 +69,15 @@ class CategoryRepositoryTest {
         val group = db.categoryGroupDao().getById(created.id)!!
         assertTrue(repo.updateGroup(group.copy(color = "#000000")) is OpResult.Success)
         assertEquals("#000000", db.categoryGroupDao().getById(created.id)?.color)
+    }
+
+    @Test
+    fun reorderGroupsPersistsNewOrder() = runTest {
+        val a = repo.createGroup("A", "#000000", 0) as OpResult.Success
+        val b = repo.createGroup("B", "#000000", 1) as OpResult.Success
+        val c = repo.createGroup("C", "#000000", 2) as OpResult.Success
+        repo.reorderGroups(listOf(c.id, a.id, b.id))
+        val live = db.categoryGroupDao().observeLive().first()
+        assertEquals(listOf("C", "A", "B"), live.map { it.name })
     }
 }
