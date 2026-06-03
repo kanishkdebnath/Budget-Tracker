@@ -61,4 +61,26 @@ class CategoryRepository(
         categoryDao.update(category.copy(archived = true, updatedAt = now()))
         return OpResult.Success(categoryId)
     }
+
+    /** Edit a group (rename/recolor). Rejects a rename onto another live group's name. */
+    suspend fun updateGroup(group: CategoryGroup): OpResult {
+        val trimmed = group.name.trim()
+        val existing = groupDao.findLiveByName(trimmed)
+        if (existing != null && existing.id != group.id) {
+            return OpResult.Failure("A group named \"$trimmed\" already exists")
+        }
+        groupDao.update(group.copy(name = trimmed, updatedAt = now()))
+        return OpResult.Success(group.id)
+    }
+
+    /** Edit a category (rename/recolor/kind/move group). Rejects a rename onto another live category's name. */
+    suspend fun updateCategory(category: Category): OpResult {
+        val trimmed = category.name.trim()
+        val existing = categoryDao.findLiveByName(trimmed)
+        if (existing != null && existing.id != category.id) {
+            return OpResult.Failure("A category named \"$trimmed\" already exists")
+        }
+        categoryDao.update(category.copy(name = trimmed, updatedAt = now()))
+        return OpResult.Success(category.id)
+    }
 }
