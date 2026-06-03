@@ -71,6 +71,10 @@ class CategoriesViewModel(private val repository: CategoryRepository) : ViewMode
     ) { groups, categories, currentFilter -> buildSections(groups, categories, currentFilter) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    /** Live groups for the category form's group picker (independent of the current filter). */
+    val liveGroups: StateFlow<List<CategoryGroup>> = repository.observeGroups()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
     fun setFilter(filter: CategoryFilter) { _filter.value = filter }
 
     fun consumeMessage() { _message.value = null }
