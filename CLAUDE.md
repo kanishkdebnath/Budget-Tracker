@@ -22,7 +22,8 @@ This is an **offline-first personal budgeting Android app**, being built in phas
 - **Phase 7 ✅** — Plan (F3): `ui/screens/plan/` — `PlanViewModel` (pure `computeTargetTotals`; carry-forward pre-fill §F3.4 with a banner), per-group target inputs, live target `NetBand`, sticky Save bar (atomic `TargetRepository.bulkSave`, §F3.3/§3.5; blank clears).
 - **Phase 8 ✅** — Report (F4): pure `domain/report/` (`aggregateReport` §7.2 + deterministic `generateNarrative` §7.3); `ui/screens/report/` — narrative box, actuals `NetBand` + planned caption, per-group Plan/Actual/Δ tables with color-coded deltas + Inc/Exp chips, recurring-due banner.
 - **Phase 9 ✅** — Recurring (F5): `ui/screens/recurring/` — `RecurringViewModel` (pure `buildRecurringRows`: applied/actionable/inactive classification + sort), Active/Inactive sections, 3-state cards (Apply / applied check-pill / inactive), create/edit sheet (scrollable) with active toggle, one-tap idempotent `apply` (§7.4) to the current month.
-- **Next:** Phase 10 (Settings, F7) — currency picker (retroactive reformat), theme/density/dynamic-color toggles; then Export (F6).
+- **Phase 10 ✅** — Settings (F7): `ui/screens/settings/` — `SettingsViewModel`, currency picker (common ISO list + custom code; retroactive reformat since all screens observe `PreferencesRepository.currency`), theme mode (System/Light/Dark) + dynamic-color toggle wired through `MainActivity` → `BudgetTrackerTheme`, About tiles.
+- **Next:** Phase 11 (Export, F6) — Excel (3-sheet xlsx, §8.1) + PDF (§8.2) export from the Report screen via the share sheet (decide POI vs a lighter writer). Density (design §7.2) is also still deferred.
 
 ## Build & test
 
