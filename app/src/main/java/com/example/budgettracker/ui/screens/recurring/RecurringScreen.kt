@@ -28,6 +28,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.budgettracker.data.entity.RecurringTemplate
 import com.example.budgettracker.ui.AppViewModelProvider
 import com.example.budgettracker.ui.components.EmptyState
+import com.example.budgettracker.ui.components.GradientFab
 
 @Composable
 fun RecurringScreen(
@@ -53,11 +54,7 @@ fun RecurringScreen(
         modifier = modifier,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = { editing = null; showSheet = true },
-                icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                text = { Text("New") },
-            )
+            GradientFab("New", onClick = { editing = null; showSheet = true })
         },
     ) { padding ->
         if (sections.active.isEmpty() && sections.inactive.isEmpty()) {

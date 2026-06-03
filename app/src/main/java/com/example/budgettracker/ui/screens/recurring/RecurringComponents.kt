@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
@@ -25,18 +26,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
 import com.example.budgettracker.domain.money.Money
+import com.example.budgettracker.ui.components.BannerTone
+import com.example.budgettracker.ui.components.GradientBanner
 import com.example.budgettracker.ui.theme.BudgetTheme
 
 @Composable
 fun RecurringDueBanner(count: Int, modifier: Modifier = Modifier) {
-    Surface(modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.tertiaryContainer) {
-        Text(
-            "$count recurring ${if (count == 1) "entry is" else "entries are"} due this month.",
-            modifier = Modifier.padding(12.dp),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onTertiaryContainer,
-        )
-    }
+    GradientBanner(
+        "$count recurring ${if (count == 1) "entry is" else "entries are"} due this month.",
+        BannerTone.AMBER,
+        modifier,
+        leadingIcon = Icons.Outlined.Schedule,
+    )
 }
 
 @Composable

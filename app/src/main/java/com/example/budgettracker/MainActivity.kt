@@ -17,7 +17,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         val preferences = (application as BudgetApplication).container.preferencesRepository
         setContent {
-            val themeModeValue by preferences.themeMode.collectAsStateWithLifecycle(initialValue = "system")
+            val themeModeValue by preferences.themeMode.collectAsStateWithLifecycle(initialValue = "dark")
             val dynamicColor by preferences.dynamicColor.collectAsStateWithLifecycle(initialValue = false)
             val darkTheme = ThemeMode.fromStorage(themeModeValue).resolveDark(isSystemInDarkTheme())
             BudgetTrackerTheme(darkTheme = darkTheme, dynamicColor = dynamicColor) {

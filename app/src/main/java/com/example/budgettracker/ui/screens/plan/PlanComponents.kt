@@ -20,21 +20,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.budgettracker.domain.money.Money
+import com.example.budgettracker.ui.components.BannerTone
+import com.example.budgettracker.ui.components.GradientBanner
 import com.example.budgettracker.ui.screens.categories.ColorDot
 import com.example.budgettracker.ui.screens.categories.parseHexColor
 
 @Composable
 fun PlanBanner(banner: PrefillBanner, modifier: Modifier = Modifier) {
-    val scheme = MaterialTheme.colorScheme
-    val (container, content, text) = when (banner) {
+    when (banner) {
         PrefillBanner.CARRIED_FORWARD ->
-            Triple(scheme.primaryContainer, scheme.onPrimaryContainer, "Pre-filled from last month's targets — tweak and save.")
+            GradientBanner("Pre-filled from last month's targets — tweak and save.", BannerTone.INFO, modifier)
         PrefillBanner.FIRST_TIME ->
-            Triple(scheme.tertiaryContainer, scheme.onTertiaryContainer, "No targets yet — set your first plan for this month.")
-        PrefillBanner.NONE -> return
-    }
-    Surface(modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), color = container) {
-        Text(text, Modifier.padding(12.dp), style = MaterialTheme.typography.bodyMedium, color = content)
+            GradientBanner("No targets yet — set your first plan for this month.", BannerTone.AMBER, modifier)
+        PrefillBanner.NONE -> Unit
     }
 }
 

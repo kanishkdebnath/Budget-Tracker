@@ -82,7 +82,7 @@ fun BudgetApp() {
                                     contentDescription = dest.label,
                                 )
                             },
-                            label = { Text(dest.label) },
+                            label = { Text(dest.navLabel) },
                         )
                     }
                 }

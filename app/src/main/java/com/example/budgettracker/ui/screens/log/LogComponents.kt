@@ -44,9 +44,9 @@ fun LogFilterChips(
     ) {
         TxnFilter.entries.forEach { filter ->
             val label = when (filter) {
-                TxnFilter.ALL -> "All"
-                TxnFilter.INCOME -> "Income ($incomeCount)"
-                TxnFilter.EXPENSE -> "Expense ($expenseCount)"
+                TxnFilter.ALL -> "All · ${incomeCount + expenseCount}"
+                TxnFilter.INCOME -> "Income · $incomeCount"
+                TxnFilter.EXPENSE -> "Expense · $expenseCount"
             }
             FilterChip(selected = filter == selected, onClick = { onSelect(filter) }, label = { Text(label) })
         }

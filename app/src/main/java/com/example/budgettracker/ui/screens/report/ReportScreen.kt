@@ -54,15 +54,9 @@ fun ReportScreen(
     ) {
         item { NarrativeBox(state.narrative) }
         item {
-            NetBand(state.data.actuals.income, state.data.actuals.expense, state.data.actuals.net, state.currency)
-        }
-        item {
-            Text(
-                "Planned   Income ${Money.format(state.data.targets.income, state.currency)}   ·   " +
-                    "Expense ${Money.format(state.data.targets.expense, state.currency)}",
-                modifier = Modifier.padding(start = 4.dp),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            NetBand(
+                state.data.actuals.income, state.data.actuals.expense, state.data.actuals.net, state.currency,
+                plannedIncome = state.data.targets.income, plannedExpense = state.data.targets.expense,
             )
         }
         if (state.recurringDueCount > 0) {

@@ -32,6 +32,7 @@ import com.example.budgettracker.data.entity.Category
 import com.example.budgettracker.data.entity.CategoryGroup
 import com.example.budgettracker.ui.AppViewModelProvider
 import com.example.budgettracker.ui.components.EmptyState
+import com.example.budgettracker.ui.components.GradientFab
 
 private sealed interface CategoriesSheet {
     data object Chooser : CategoriesSheet
@@ -62,11 +63,7 @@ fun CategoriesScreen(
         modifier = modifier,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = { sheet = CategoriesSheet.Chooser },
-                icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                text = { Text("New") },
-            )
+            GradientFab("New", onClick = { sheet = CategoriesSheet.Chooser })
         },
     ) { padding ->
         Column(Modifier.padding(padding).fillMaxSize()) {

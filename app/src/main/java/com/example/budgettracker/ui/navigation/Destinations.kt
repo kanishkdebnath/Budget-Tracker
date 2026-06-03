@@ -19,14 +19,15 @@ const val SETTINGS_ROUTE = "settings"
 enum class TopLevelDest(
     val route: String,
     val label: String,
+    val navLabel: String,
     val filledIcon: ImageVector,
     val outlinedIcon: ImageVector,
 ) {
-    LOG("log", "Log", Icons.AutoMirrored.Filled.ReceiptLong, Icons.AutoMirrored.Outlined.ReceiptLong),
-    PLAN("plan", "Plan", Icons.Filled.TrackChanges, Icons.Outlined.TrackChanges),
-    REPORT("report", "Report", Icons.Filled.BarChart, Icons.Outlined.BarChart),
-    CATEGORIES("categories", "Categories", Icons.Filled.Category, Icons.Outlined.Category),
-    RECURRING("recurring", "Recurring", Icons.Filled.Autorenew, Icons.Outlined.Autorenew),
+    LOG("log", "Log", "Log", Icons.AutoMirrored.Filled.ReceiptLong, Icons.AutoMirrored.Outlined.ReceiptLong),
+    PLAN("plan", "Plan", "Plan", Icons.Filled.TrackChanges, Icons.Outlined.TrackChanges),
+    REPORT("report", "Report", "Report", Icons.Filled.BarChart, Icons.Outlined.BarChart),
+    CATEGORIES("categories", "Categories", "Cats", Icons.Filled.Category, Icons.Outlined.Category),
+    RECURRING("recurring", "Recurring", "Recur", Icons.Filled.Autorenew, Icons.Outlined.Autorenew),
     ;
 
     companion object {

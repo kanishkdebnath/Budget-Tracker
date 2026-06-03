@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -22,6 +24,8 @@ import com.example.budgettracker.data.entity.Kind
 import com.example.budgettracker.domain.money.Money
 import com.example.budgettracker.domain.report.CategoryReportRow
 import com.example.budgettracker.domain.report.GroupReport
+import com.example.budgettracker.ui.components.BannerTone
+import com.example.budgettracker.ui.components.GradientBanner
 import com.example.budgettracker.ui.screens.categories.ColorDot
 import com.example.budgettracker.ui.screens.categories.KindChip
 import com.example.budgettracker.ui.screens.categories.parseHexColor
@@ -41,14 +45,12 @@ fun NarrativeBox(narrative: String, modifier: Modifier = Modifier) {
 
 @Composable
 fun RecurringDueBanner(count: Int, modifier: Modifier = Modifier) {
-    Surface(modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.tertiaryContainer) {
-        Text(
-            "$count recurring ${if (count == 1) "entry" else "entries"} due this month — apply on the Recurring tab.",
-            modifier = Modifier.padding(12.dp),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onTertiaryContainer,
-        )
-    }
+    GradientBanner(
+        "$count recurring ${if (count == 1) "entry is" else "entries are"} due this month — apply on the Recurring tab.",
+        BannerTone.AMBER,
+        modifier,
+        leadingIcon = Icons.Outlined.Schedule,
+    )
 }
 
 @Composable

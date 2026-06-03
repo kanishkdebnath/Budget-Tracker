@@ -67,6 +67,15 @@ class MoneyTest {
         assertEquals(100000000L, Money.parseToMinor("10,00,000")) // Indian grouping input
     }
 
+    @Test fun shortNotationForHeroSurfaces() {
+        assertEquals("₹85k", Money.formatShort(8_500_000, "INR"))   // 85,000
+        assertEquals("₹6.8k", Money.formatShort(680_000, "INR"))    // 6,800
+        assertEquals("₹1.5L", Money.formatShort(15_000_000, "INR")) // 1,50,000
+        assertEquals("-₹6.8k", Money.formatShort(-680_000, "INR"))
+        assertEquals("₹500", Money.formatShort(50_000, "INR"))      // below 1k → full
+        assertEquals("$85k", Money.formatShort(8_500_000, "USD"))
+    }
+
     @Test fun rejectsInvalidAmountInput() {
         assertEquals(null, Money.parseToMinor(""))
         assertEquals(null, Money.parseToMinor("0"))        // must be > 0
