@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Card
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,10 +25,12 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.budgettracker.domain.money.Money
+import com.example.budgettracker.domain.time.MonthUtils
 import com.example.budgettracker.export.ExportBundle
 import com.example.budgettracker.export.ExportFormat
 import com.example.budgettracker.export.ExportManager
 import com.example.budgettracker.ui.AppViewModelProvider
+import com.example.budgettracker.ui.components.BudgetCard
 import com.example.budgettracker.ui.components.NetBand
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -52,7 +53,7 @@ fun ReportScreen(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        item { NarrativeBox(state.narrative) }
+        item { NarrativeBox(state.narrative, MonthUtils.monthLabel(month)) }
         item {
             NetBand(
                 state.data.actuals.income, state.data.actuals.expense, state.data.actuals.net, state.currency,
@@ -81,7 +82,7 @@ fun ReportScreen(
 
 @Composable
 private fun ExportCard(enabled: Boolean, onExport: (ExportFormat) -> Unit) {
-    Card(Modifier.fillMaxWidth()) {
+    BudgetCard {
         Column(Modifier.padding(16.dp)) {
             Text("Export this month", style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(8.dp))
