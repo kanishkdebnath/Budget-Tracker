@@ -46,6 +46,9 @@ object Money {
         return "$sign$symbol$body"
     }
 
+    /** Display symbol for [currency] (e.g. "₹", "$"); unknown codes get a "CODE " prefix. */
+    fun symbolOf(currency: String): String = FORMATS[currency]?.symbol ?: "$currency "
+
     private val AMOUNT_PATTERN = Regex("""^\d+(\.\d{1,2})?$""")
 
     /**

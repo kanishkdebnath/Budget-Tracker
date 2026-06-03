@@ -138,8 +138,8 @@ class LogViewModel(
     fun addTransaction(date: Long, categoryId: Long, amount: Long, note: String?) =
         viewModelScope.launch { transactionRepository.add(date, categoryId, amount, note) }
 
-    fun updateTransaction(transaction: TransactionEntity) =
-        viewModelScope.launch { transactionRepository.update(transaction) }
+    fun editTransaction(id: Long, date: Long, categoryId: Long, amount: Long, note: String?) =
+        viewModelScope.launch { transactionRepository.edit(id, date, categoryId, amount, note) }
 
     fun deleteTransaction(id: Long) =
         viewModelScope.launch { transactionRepository.delete(id) }
