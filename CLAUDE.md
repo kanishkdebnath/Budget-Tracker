@@ -19,7 +19,8 @@ This is an **offline-first personal budgeting Android app**, being built in phas
 - **Phase 4 ✅** — app shell under `ui/`: `BudgetApplication` (owns `AppContainer`, seeds on launch), `BudgetApp` (Scaffold + `NavigationBar` 5 tabs + `NavHost`), Settings via top-bar gear, shared month-nav top bar (`ui/components`), empty-state placeholder screens (`ui/screens/*`). `MainActivity` hosts `BudgetApp`. ViewModels are built by `ui/AppViewModelProvider` (reads `BudgetApplication.container`).
 - **Phase 5 + 5b ✅** — Categories (F2): `ui/screens/categories/` — `CategoriesViewModel` (pure `buildSections` for the 4 filters), grouped list with filter chips, create/edit/archive sheets (archive surfaces the live-categories guard via snackbar), and drag-to-reorder groups + categories (`sh.calvin.reorderable`, persisted via atomic DAO `reorder()`).
 - **Phase 6 + 6b ✅** — Log (F1 + F8): `ui/screens/log/` — `LogViewModel` (pure `buildLogState`: month Net-band totals + per-date sections), `NetBand` (shared `ui/components`), per-date transaction cards, add/edit/delete sheet (amount parse via `Money.parseToMinor`, category dropdown, M3 date picker, §F1.5 cross-month jump), and a calculator popover (`domain/calc/Calculator` + `CalculatorDialog`).
-- **Next:** Phase 7 (Plan, F3) — replace the `PlanScreen` placeholder with per-category monthly target inputs, the carry-forward pre-fill banner (§F3.4), and the atomic bulk-save (`TargetRepository.bulkSave`); reuse `NetBand`.
+- **Phase 7 ✅** — Plan (F3): `ui/screens/plan/` — `PlanViewModel` (pure `computeTargetTotals`; carry-forward pre-fill §F3.4 with a banner), per-group target inputs, live target `NetBand`, sticky Save bar (atomic `TargetRepository.bulkSave`, §F3.3/§3.5; blank clears).
+- **Next:** Phase 8 (Report, F4) — target-vs-actual report + deterministic narrative; then Recurring (F5), Settings (F7), Export (F6).
 
 ## Build & test
 

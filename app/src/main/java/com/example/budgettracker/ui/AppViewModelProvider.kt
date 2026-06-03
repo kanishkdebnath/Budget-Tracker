@@ -6,6 +6,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.budgettracker.BudgetApplication
 import com.example.budgettracker.ui.screens.categories.CategoriesViewModel
 import com.example.budgettracker.ui.screens.log.LogViewModel
+import com.example.budgettracker.ui.screens.plan.PlanViewModel
 
 /** Builds ViewModels from the [BudgetApplication] container (manual DI — no Hilt). */
 object AppViewModelProvider {
@@ -19,6 +20,14 @@ object AppViewModelProvider {
             LogViewModel(
                 app.container.transactionRepository,
                 app.container.categoryRepository,
+                app.container.preferencesRepository,
+            )
+        }
+        initializer {
+            val app = this[APPLICATION_KEY] as BudgetApplication
+            PlanViewModel(
+                app.container.categoryRepository,
+                app.container.targetRepository,
                 app.container.preferencesRepository,
             )
         }
