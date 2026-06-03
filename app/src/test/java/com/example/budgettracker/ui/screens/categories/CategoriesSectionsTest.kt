@@ -40,4 +40,26 @@ class CategoriesSectionsTest {
         assertEquals(listOf("Gone"), sections[0].categories.map { it.name })
         assertEquals(emptyList<String>(), sections[1].categories.map { it.name })
     }
+
+    @Test fun queryMatchesCategoryNameKeepsOnlyMatchingCategories() {
+        val sections = buildSections(groups, cats, CategoryFilter.ALL, query = "rent")
+        assertEquals(listOf("Bills"), sections.map { it.group.name })
+        assertEquals(listOf("Rent"), sections[0].categories.map { it.name })
+    }
+
+    @Test fun queryMatchingGroupNameKeepsAllItsCategories() {
+        val sections = buildSections(groups, cats, CategoryFilter.ALL, query = "bills")
+        assertEquals(listOf("Bills"), sections.map { it.group.name })
+        assertEquals(listOf("Rent"), sections[0].categories.map { it.name })
+    }
+
+    @Test fun queryIsCaseInsensitiveAndTrimmed() {
+        val sections = buildSections(groups, cats, CategoryFilter.ALL, query = "  SALARY ")
+        assertEquals(listOf("Income"), sections.map { it.group.name })
+        assertEquals(listOf("Salary"), sections[0].categories.map { it.name })
+    }
+
+    @Test fun queryWithNoMatchReturnsEmpty() {
+        assertEquals(emptyList<GroupSection>(), buildSections(groups, cats, CategoryFilter.ALL, query = "zzz"))
+    }
 }

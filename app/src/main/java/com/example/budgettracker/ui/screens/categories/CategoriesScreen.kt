@@ -46,14 +46,20 @@ private sealed interface CategoriesSheet {
 @Composable
 fun CategoriesScreen(
     modifier: Modifier = Modifier,
+    searchActive: Boolean = false,
+    onSearchClose: () -> Unit = {},
     viewModel: CategoriesViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val sections by viewModel.sections.collectAsStateWithLifecycle()
     val filter by viewModel.filter.collectAsStateWithLifecycle()
+    val query by viewModel.query.collectAsStateWithLifecycle()
     val liveGroups by viewModel.liveGroups.collectAsStateWithLifecycle()
     val message by viewModel.message.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     var sheet by remember { mutableStateOf<CategoriesSheet?>(null) }
+
+    // Closing the search bar clears its query so the full list returns.
+    LaunchedEffect(searchActive) { if (!searchActive) viewModel.setQuery("") }
 
     LaunchedEffect(message) {
         message?.let {
@@ -77,16 +83,21 @@ fun CategoriesScreen(
     ) { padding ->
         Column(Modifier.padding(padding).fillMaxSize()) {
             Spacer(Modifier.height(8.dp))
+            if (searchActive) {
+                CategorySearchField(query, viewModel::setQuery, onClose = onSearchClose)
+                Spacer(Modifier.height(8.dp))
+            }
             CategoryFilterChips(filter, viewModel::setFilter)
             Spacer(Modifier.height(8.dp))
             if (sections.isEmpty()) {
                 EmptyState(
                     icon = Icons.Outlined.Category,
-                    title = "Nothing here",
-                    subtitle = "Add a category or group with the New button.",
+                    title = if (query.isNotBlank()) "No matches" else "Nothing here",
+                    subtitle = if (query.isNotBlank()) "No categories match \"$query\"."
+                    else "Add a category or group with the New button.",
                 )
-            } else if (filter == CategoryFilter.ALL) {
-                // Drag-to-reorder is only meaningful on the unfiltered list.
+            } else if (filter == CategoryFilter.ALL && query.isBlank()) {
+                // Drag-to-reorder is only meaningful on the full, unfiltered list.
                 ReorderableSections(
                     sections = sections,
                     onReorderGroups = viewModel::reorderGroups,

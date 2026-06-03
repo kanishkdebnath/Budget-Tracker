@@ -56,6 +56,7 @@ fun BudgetApp() {
     var month by rememberSaveable {
         mutableStateOf(MonthUtils.monthOf(System.currentTimeMillis(), ZoneId.systemDefault()))
     }
+    var categoriesSearchActive by rememberSaveable { mutableStateOf(false) }
     val goToSettings = { navController.navigate(SETTINGS_ROUTE) { launchSingleTop = true } }
 
     BudgetBackground {
@@ -71,7 +72,10 @@ fun BudgetApp() {
                         onNextMonth = { month = YearMonth.parse(month).plusMonths(1).toString() },
                         onSettings = goToSettings,
                     )
-                    currentDest == TopLevelDest.CATEGORIES -> SectionTopBar("Categories", goToSettings)
+                    currentDest == TopLevelDest.CATEGORIES -> SectionTopBar(
+                    "Categories", goToSettings,
+                    onSearch = { categoriesSearchActive = !categoriesSearchActive },
+                )
                     currentDest == TopLevelDest.RECURRING -> SectionTopBar("Recurring", goToSettings)
                     currentRoute == SETTINGS_ROUTE -> BackTopBar("Settings", onBack = { navController.popBackStack() })
                 }
@@ -88,7 +92,12 @@ fun BudgetApp() {
                 composable(TopLevelDest.LOG.route) { LogScreen(month = month, onMonthChange = { month = it }) }
                 composable(TopLevelDest.PLAN.route) { PlanScreen(month) }
                 composable(TopLevelDest.REPORT.route) { ReportScreen(month) }
-                composable(TopLevelDest.CATEGORIES.route) { CategoriesScreen() }
+                composable(TopLevelDest.CATEGORIES.route) {
+                CategoriesScreen(
+                    searchActive = categoriesSearchActive,
+                    onSearchClose = { categoriesSearchActive = false },
+                )
+            }
                 composable(TopLevelDest.RECURRING.route) { RecurringScreen() }
                 composable(SETTINGS_ROUTE) { SettingsScreen() }
             }
