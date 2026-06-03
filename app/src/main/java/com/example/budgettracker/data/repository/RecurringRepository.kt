@@ -55,4 +55,19 @@ class RecurringRepository(
         }
         return OpResult.Success(templateId)
     }
+
+    suspend fun update(id: Long, label: String, categoryId: Long, amount: Long, dayOfMonth: Int, active: Boolean) {
+        val existing = recurringDao.getById(id) ?: return
+        recurringDao.update(
+            existing.copy(
+                label = label.trim(), categoryId = categoryId, amount = amount,
+                dayOfMonth = dayOfMonth, active = active, updatedAt = now(),
+            ),
+        )
+    }
+
+    suspend fun setActive(id: Long, active: Boolean) {
+        val existing = recurringDao.getById(id) ?: return
+        recurringDao.update(existing.copy(active = active, updatedAt = now()))
+    }
 }

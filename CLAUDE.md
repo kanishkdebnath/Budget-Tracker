@@ -21,7 +21,8 @@ This is an **offline-first personal budgeting Android app**, being built in phas
 - **Phase 6 + 6b ✅** — Log (F1 + F8): `ui/screens/log/` — `LogViewModel` (pure `buildLogState`: month Net-band totals + per-date sections), `NetBand` (shared `ui/components`), per-date transaction cards, add/edit/delete sheet (amount parse via `Money.parseToMinor`, category dropdown, M3 date picker, §F1.5 cross-month jump), and a calculator popover (`domain/calc/Calculator` + `CalculatorDialog`).
 - **Phase 7 ✅** — Plan (F3): `ui/screens/plan/` — `PlanViewModel` (pure `computeTargetTotals`; carry-forward pre-fill §F3.4 with a banner), per-group target inputs, live target `NetBand`, sticky Save bar (atomic `TargetRepository.bulkSave`, §F3.3/§3.5; blank clears).
 - **Phase 8 ✅** — Report (F4): pure `domain/report/` (`aggregateReport` §7.2 + deterministic `generateNarrative` §7.3); `ui/screens/report/` — narrative box, actuals `NetBand` + planned caption, per-group Plan/Actual/Δ tables with color-coded deltas + Inc/Exp chips, recurring-due banner.
-- **Next:** Phase 9 (Recurring, F5) — replace the `RecurringScreen` placeholder with the templates list + one-tap idempotent apply (`RecurringRepository.apply`); then Settings (F7), Export (F6).
+- **Phase 9 ✅** — Recurring (F5): `ui/screens/recurring/` — `RecurringViewModel` (pure `buildRecurringRows`: applied/actionable/inactive classification + sort), Active/Inactive sections, 3-state cards (Apply / applied check-pill / inactive), create/edit sheet (scrollable) with active toggle, one-tap idempotent `apply` (§7.4) to the current month.
+- **Next:** Phase 10 (Settings, F7) — currency picker (retroactive reformat), theme/density/dynamic-color toggles; then Export (F6).
 
 ## Build & test
 
