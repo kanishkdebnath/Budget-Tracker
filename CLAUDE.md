@@ -84,4 +84,4 @@ The GitHub remote is `origin` → `https://github.com/kanishkdebnath/Budget-Trac
 1. Branch off `main` (`feat/...`, `fix/...`, `docs/...`, or `feat/phase-N-...` for a roadmap phase).
 2. Commit in bite-sized Conventional Commits; keep tests passing per commit.
 3. Push and open a PR: `gh pr create` (verify `./gradlew test` is green first).
-4. Merge the PR, then delete the branch. One roadmap phase = one branch = one PR.
+4. **The human reviews and merges** the PR on GitHub — Claude opens PRs and waits, and does **not** self-merge. After merge, delete the branch. One roadmap phase = one branch = one PR.
