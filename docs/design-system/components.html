@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Budget Tracker · Components</title>
+<style>
+  :root {
+    /* Brand tokens — dark */
+    --bg: #0A1218;
+    --surface: #11191F;
+    --surface-2: #1A2229;
+    --surface-3: #243038;
+    --line: rgba(255,255,255,0.06);
+    --line-strong: rgba(255,255,255,0.12);
+    --text: #E0E7EC;
+    --text-dim: #C0C9D0;
+    --muted: #93A1AB;
+    --primary: #9CC8DE;
+    --primary-container: #143548;
+    --on-primary: #003547;
+    --on-primary-container: #C5E5F9;
+    --secondary: #B5C5CF;
+    --tertiary: #FFB68D;
+    --tertiary-container: #6A3B16;
+    --on-tertiary-container: #FFDDB6;
+    --error: #FFB4A8;
+    --error-container: #93000A;
+    --income: #74D9B5;
+    --income-dim: #2A8061;
+    --overage: #FFB4A8;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 32px 28px 80px; }
+
+  /* Header */
+  .page-title { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; font-weight: 500; }
+  h1 { font-size: 32px; font-weight: 600; letter-spacing: -0.02em; margin: 0 0 8px; }
+  .lede { color: var(--muted); font-size: 15px; line-height: 1.55; max-width: 720px; margin: 0 0 40px; }
+
+  /* Section */
+  .section { margin-top: 56px; }
+  .section > h2 { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); font-weight: 500; margin: 0 0 14px; display: flex; align-items: center; gap: 12px; }
+  .section > h2::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+  .section .note { color: var(--muted); font-size: 13.5px; line-height: 1.55; margin: 0 0 22px; max-width: 720px; }
+
+  /* Sub-section card */
+  .comp-grid { display: grid; gap: 18px; }
+  .comp-grid.two { grid-template-columns: 1fr 1fr; }
+  .comp-grid.three { grid-template-columns: repeat(3, 1fr); }
+  .comp { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; }
+  .comp-head { padding: 14px 18px 8px; display: flex; justify-content: space-between; align-items: baseline; }
+  .comp-head .name { font-size: 13px; font-weight: 600; }
+  .comp-head .tag { font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .comp-desc { padding: 0 18px 14px; font-size: 11.5px; color: var(--muted); line-height: 1.5; }
+  .comp-stage { background: var(--bg); padding: 22px; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 14px; align-items: stretch; }
+  .comp-stage.row { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 12px; }
+  .comp-stage.center { align-items: center; justify-content: center; }
+
+  /* ===== BUTTONS ===== */
+  .btn { display: inline-flex; align-items: center; gap: 8px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 500; letter-spacing: 0.01em; cursor: pointer; border: none; padding: 10px 22px; border-radius: 999px; transition: filter 150ms; }
+  .btn:hover { filter: brightness(1.08); }
+  .btn-filled { background: var(--primary); color: var(--on-primary); }
+  .btn-tonal { background: var(--primary-container); color: var(--on-primary-container); }
+  .btn-outline { background: transparent; color: var(--primary); border: 1px solid var(--line-strong); }
+  .btn-text { background: transparent; color: var(--primary); padding: 10px 12px; }
+  .btn-error { background: var(--error-container); color: var(--error); }
+  .btn-disabled { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.3); cursor: not-allowed; }
+  .btn-icon { width: 40px; height: 40px; border-radius: 999px; padding: 0; display: inline-flex; align-items: center; justify-content: center; background: transparent; color: var(--text); border: none; cursor: pointer; }
+  .btn-icon:hover { background: var(--surface-2); }
+  .btn-icon.tonal { background: var(--surface-2); }
+  .icon { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .icon-lg { width: 24px; height: 24px; }
+
+  /* FAB */
+  .fab { display: inline-flex; align-items: center; gap: 8px; background: var(--primary-container); color: var(--on-primary-container); padding: 14px 22px; border-radius: 20px; font-weight: 600; font-size: 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.4); }
+  .fab.small { padding: 12px; border-radius: 16px; width: 48px; height: 48px; justify-content: center; }
+
+  /* ===== CHIPS ===== */
+  .chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; font-size: 12.5px; font-weight: 500; border: 1px solid var(--line-strong); color: var(--text-dim); background: transparent; cursor: pointer; }
+  .chip.selected { background: var(--primary-container); color: var(--on-primary-container); border-color: var(--primary-container); }
+  .chip.dim { background: var(--surface-2); border-color: transparent; color: var(--muted); }
+  .chip-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* Delta badge */
+  .delta { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .delta.pos { background: rgba(116, 217, 181, 0.12); color: var(--income); }
+  .delta.neg { background: rgba(255, 180, 168, 0.12); color: var(--overage); }
+  .delta.flat { background: var(--surface-2); color: var(--muted); }
+
+  /* ===== INPUTS ===== */
+  .field { display: flex; flex-direction: column; gap: 4px; }
+  .field-input { background: var(--surface-2); border: 1px solid transparent; padding: 14px 16px; border-radius: 8px; color: var(--text); font-family: inherit; font-size: 14.5px; outline: none; }
+  .field-input:focus { border-color: var(--primary); background: var(--surface); }
+  .field-label { font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); margin-left: 4px; font-weight: 500; }
+  .field-amount { font-family: inherit; font-size: 22px; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+
+  .amount-field { display: flex; align-items: center; background: var(--surface-2); border-radius: 8px; padding: 4px 6px 4px 16px; gap: 6px; }
+  .amount-field .currency { font-size: 16px; color: var(--muted); font-weight: 500; }
+  .amount-field input { flex: 1; background: transparent; border: none; outline: none; color: var(--text); font-family: inherit; font-size: 22px; font-weight: 500; font-variant-numeric: tabular-nums; padding: 10px 0; }
+  .amount-field .calc-btn { background: var(--surface-3); color: var(--primary); border: none; border-radius: 8px; padding: 8px 10px; font-size: 14px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+
+  /* ===== SWITCH ===== */
+  .sw { display: inline-flex; align-items: center; gap: 10px; }
+  .sw-track { width: 48px; height: 28px; border-radius: 999px; background: var(--surface-3); border: 2px solid var(--surface-3); position: relative; cursor: pointer; transition: background 150ms; }
+  .sw-track.on { background: var(--primary); border-color: var(--primary); }
+  .sw-thumb { position: absolute; left: 2px; top: 2px; width: 20px; height: 20px; border-radius: 50%; background: var(--muted); transition: all 150ms; }
+  .sw-track.on .sw-thumb { left: 22px; background: var(--on-primary); }
+
+  /* ===== NET BAND ===== */
+  .net-band { background: var(--primary-container); border-radius: 18px; padding: 18px 20px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .net-cell .label { font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--on-primary-container); opacity: 0.7; margin-bottom: 6px; font-weight: 500; }
+  .net-cell .val { font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -0.012em; color: var(--on-primary-container); }
+  .net-cell .val.pos { color: var(--income); }
+  .net-cell .val.neg { color: var(--overage); }
+  .net-cell .sub { font-size: 10.5px; color: var(--on-primary-container); opacity: 0.55; margin-top: 4px; font-variant-numeric: tabular-nums; }
+
+  /* ===== TXN ROW ===== */
+  .txn-card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+  .txn-row { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-top: 1px solid var(--line); cursor: pointer; }
+  .txn-row:first-child { border-top: none; }
+  .txn-bar { width: 3px; align-self: stretch; border-radius: 2px; }
+  .txn-main { flex: 1; min-width: 0; }
+  .txn-title { font-size: 14.5px; font-weight: 600; color: var(--text); }
+  .txn-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .txn-amt { font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--text); }
+  .txn-amt.pos { color: var(--income); }
+
+  /* ===== GROUP HEADER (Plan/Report/Categories) ===== */
+  .grp-card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 4px; }
+  .grp-head { display: flex; align-items: center; gap: 12px; padding: 12px 14px; }
+  .grp-dot { width: 10px; height: 10px; border-radius: 3px; }
+  .grp-name { flex: 1; font-size: 14px; font-weight: 600; }
+  .grp-kind { font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); padding: 3px 8px; background: var(--surface-2); border-radius: 999px; }
+  .grp-subtotal { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  /* ===== TARGET / ACTUAL ROW (Report) ===== */
+  .ta-row { display: grid; grid-template-columns: 1fr 80px 80px 70px; align-items: center; gap: 12px; padding: 12px 14px; border-top: 1px solid var(--line); }
+  .ta-row .name { font-size: 13.5px; color: var(--text); }
+  .ta-row .num { text-align: right; font-size: 13px; font-variant-numeric: tabular-nums; color: var(--text-dim); }
+  .ta-row .delta-cell { text-align: right; }
+
+  /* ===== PLAN INPUT ROW ===== */
+  .pl-row { display: grid; grid-template-columns: 14px 1fr 130px; align-items: center; gap: 12px; padding: 10px 14px; border-top: 1px solid var(--line); }
+  .pl-row:first-child { border-top: none; }
+  .pl-input { background: var(--surface-2); border: 1px solid transparent; border-radius: 8px; padding: 8px 10px; color: var(--text); font-family: inherit; font-size: 14px; font-weight: 500; font-variant-numeric: tabular-nums; text-align: right; outline: none; }
+  .pl-input:focus { border-color: var(--primary); background: var(--surface); }
+  .pl-input.placeholder { color: var(--muted); font-weight: 400; }
+
+  /* ===== RECURRING TEMPLATE CARD ===== */
+  .rec-card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: center; }
+  .rec-card.inactive { opacity: 0.55; }
+  .rec-meta { display: flex; flex-direction: column; gap: 4px; }
+  .rec-title { font-size: 14.5px; font-weight: 600; }
+  .rec-sub { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 10px; }
+  .rec-sub .sep { width: 3px; height: 3px; border-radius: 50%; background: var(--muted); opacity: 0.5; }
+  .rec-amt { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--text); }
+  .rec-actions { display: flex; align-items: center; gap: 10px; }
+
+  /* ===== BANNER ===== */
+  .banner { display: flex; gap: 12px; padding: 12px 14px; border-radius: 12px; background: var(--tertiary-container); color: var(--on-tertiary-container); align-items: flex-start; font-size: 13px; line-height: 1.45; }
+  .banner.info { background: var(--primary-container); color: var(--on-primary-container); }
+  .banner .b-icon { flex-shrink: 0; width: 18px; height: 18px; margin-top: 2px; }
+  .banner .b-body { flex: 1; }
+  .banner .b-title { font-weight: 600; margin-bottom: 2px; }
+  .banner .b-action { font-size: 12.5px; font-weight: 600; opacity: 0.9; cursor: pointer; }
+
+  /* ===== NARRATIVE BOX ===== */
+  .narrative { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; }
+  .narrative .nrt-label { font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .narrative .nrt-text { font-size: 15px; line-height: 1.55; color: var(--text); }
+  .narrative .nrt-text strong { color: var(--text); font-weight: 600; }
+  .narrative .nrt-over { color: var(--overage); font-weight: 600; }
+
+  /* ===== TOP APP BAR ===== */
+  .topbar { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 10px 14px; display: flex; align-items: center; gap: 12px; }
+  .topbar .month-nav { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .topbar .month-label { font-size: 15px; font-weight: 600; min-width: 100px; text-align: center; }
+
+  /* ===== BOTTOM NAV ===== */
+  .bnav { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 8px 8px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
+  .bnav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 0; cursor: pointer; }
+  .bnav-pill { width: 52px; height: 28px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; color: var(--muted); transition: background 150ms; }
+  .bnav-item.active .bnav-pill { background: var(--primary-container); color: var(--on-primary-container); }
+  .bnav-label { font-size: 10.5px; color: var(--muted); font-weight: 500; }
+  .bnav-item.active .bnav-label { color: var(--text); font-weight: 600; }
+
+  /* ===== SHEET / DIALOG ===== */
+  .sheet { background: var(--surface); border-radius: 20px; padding: 22px; border: 1px solid var(--line); }
+  .sheet .sheet-handle { width: 36px; height: 4px; background: var(--surface-3); border-radius: 999px; margin: -10px auto 14px; }
+  .sheet h3 { font-size: 16px; font-weight: 600; margin: 0 0 14px; }
+
+  /* Calculator preview */
+  .calc { background: var(--surface); border-radius: 20px; padding: 16px; border: 1px solid var(--line); width: 100%; max-width: 280px; }
+  .calc .display { background: var(--surface-2); border-radius: 12px; padding: 14px 16px; text-align: right; font-family: 'Inter', sans-serif; font-size: 24px; font-weight: 500; font-variant-numeric: tabular-nums; color: var(--text); margin-bottom: 10px; }
+  .calc .display .expr { font-size: 11px; color: var(--muted); margin-bottom: 2px; }
+  .calc-keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .ckey { background: var(--surface-2); border-radius: 12px; padding: 14px 0; text-align: center; font-size: 15px; font-weight: 500; cursor: pointer; color: var(--text); }
+  .ckey.op { color: var(--primary); }
+  .ckey.eq { background: var(--primary); color: var(--on-primary); grid-row: span 2; }
+  .ckey.zero { grid-column: span 2; }
+  .ckey.clear { color: var(--overage); }
+
+  /* Snackbar */
+  .snack { background: var(--surface-3); color: var(--text); padding: 12px 16px 12px 18px; border-radius: 12px; display: flex; align-items: center; gap: 16px; font-size: 13.5px; max-width: 360px; }
+  .snack .s-action { color: var(--primary); font-weight: 600; font-size: 13px; cursor: pointer; }
+
+  /* Empty state */
+  .empty { padding: 28px 20px; text-align: center; }
+  .empty .e-glyph { font-size: 28px; opacity: 0.4; margin-bottom: 8px; }
+  .empty .e-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+  .empty .e-sub { font-size: 12.5px; color: var(--muted); line-height: 1.5; max-width: 280px; margin: 0 auto; }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <p class="page-title">Budget Tracker · §2 Components</p>
+  <h1>Component library</h1>
+  <p class="lede">Everything the six screens will assemble from. All swatches use the navy palette. Every money figure is tabular. All interactive surfaces obey the pill/16/20 shape language from §1.</p>
+
+  <!-- ===== BUTTONS ===== -->
+  <div class="section">
+    <h2>Buttons & FAB</h2>
+    <p class="note">Five button roles cover everything. Primary CTA is filled with the brand-light primary in dark. <strong style="color:var(--text);">Apply</strong> on Recurring uses tonal (primary-container) for a softer feel.</p>
+
+    <div class="comp-grid two">
+      <div class="comp">
+        <div class="comp-head"><span class="name">Button variants</span><span class="tag">pill · 40dp</span></div>
+        <div class="comp-stage row">
+          <button class="btn btn-filled">Save targets</button>
+          <button class="btn btn-tonal">Apply for June</button>
+          <button class="btn btn-outline">Cancel</button>
+          <button class="btn btn-text">Skip</button>
+          <button class="btn btn-disabled">Already applied</button>
+        </div>
+      </div>
+      <div class="comp">
+        <div class="comp-head"><span class="name">FAB & icon buttons</span><span class="tag">20dp · pill</span></div>
+        <div class="comp-stage row">
+          <button class="fab"><svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Add transaction</button>
+          <button class="fab small"><svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+          <button class="btn-icon tonal"><svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M6 6l1 14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-14"/></svg></button>
+          <button class="btn-icon"><svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CHIPS & BADGES ===== -->
+  <div class="section">
+    <h2>Chips & delta badges</h2>
+    <p class="note">Filter chips for Income/Expense, group chips for Categories filtering. Delta badges are everywhere money is compared to a target — color carries sign, but the +/− prefix and shape do the same job for color-blind users.</p>
+
+    <div class="comp-grid two">
+      <div class="comp">
+        <div class="comp-head"><span class="name">Filter chips</span><span class="tag">pill · selectable</span></div>
+        <div class="comp-stage row">
+          <span class="chip selected">All</span>
+          <span class="chip">Income</span>
+          <span class="chip">Expense</span>
+          <span class="chip"><span class="chip-dot" style="background:#10b981"></span>Income</span>
+          <span class="chip"><span class="chip-dot" style="background:#f59e0b"></span>Household</span>
+        </div>
+      </div>
+      <div class="comp">
+        <div class="comp-head"><span class="name">Delta badges</span><span class="tag">±sign · color · pill</span></div>
+        <div class="comp-stage row">
+          <span class="delta pos">−₹500 under</span>
+          <span class="delta neg">+₹2,450 over</span>
+          <span class="delta flat">On target</span>
+          <span class="delta neg">+8%</span>
+          <span class="delta pos">−15%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== INPUTS ===== -->
+  <div class="section">
+    <h2>Inputs</h2>
+    <p class="note">Outlined-style inputs on surface-2 fill (not stroked) keep the screens clean. Amount field has the calculator trigger baked in — tapping the keypad icon opens the bottom-sheet calculator (§7).</p>
+
+    <div class="comp-grid two">
+      <div class="comp">
+        <div class="comp-head"><span class="name">Text field</span><span class="tag">8dp · 48 touch</span></div>
+        <div class="comp-stage">
+          <div class="field">
+            <label class="field-label">Description (optional)</label>
+            <input class="field-input" placeholder="e.g. UPI to building society" value="Electricity for June"/>
+          </div>
+          <div class="field">
+            <label class="field-label">Date</label>
+            <input class="field-input" value="2 Jun 2026"/>
+          </div>
+        </div>
+      </div>
+      <div class="comp">
+        <div class="comp-head"><span class="name">Amount field</span><span class="tag">calc-bound · tnum</span></div>
+        <div class="comp-stage">
+          <div class="field">
+            <label class="field-label">Amount</label>
+            <div class="amount-field">
+              <span class="currency">₹</span>
+              <input value="2,340.50" />
+              <button class="calc-btn"><svg class="icon" viewBox="0 0 24 24" style="width:14px;height:14px"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M12 10h2M16 10h0M8 14h2M12 14h2M16 14h0M8 18h2M12 18h6"/></svg> calc</button>
+            </div>
+          </div>
+          <div class="sw" style="margin-top: 8px;">
+            <span style="font-size: 13px;">Active</span>
+            <div class="sw-track on"><div class="sw-thumb"></div></div>
+            <span style="font-size: 12.5px; color: var(--muted);">Switch · 28dp track</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== NET BAND ===== -->
+  <div class="section">
+    <h2>Net band</h2>
+    <p class="note">The signature element. Sits at the top of Log and Report. Container = primary-container (brand-tinted), three columns: Income (sea-green) · Expense (neutral text) · Net (sign-colored). Target totals appear as small sub-rows when context warrants (Report).</p>
+
+    <div class="comp-grid two">
+      <div class="comp">
+        <div class="comp-head"><span class="name">Net band · Log</span><span class="tag">3-col · primary-container</span></div>
+        <div class="comp-stage">
+          <div class="net-band">
+            <div class="net-cell"><div class="label">Income</div><div class="val pos">₹85,000</div></div>
+            <div class="net-cell"><div class="label">Expense</div><div class="val">₹32,450</div></div>
+            <div class="net-cell"><div class="label">Net</div><div class="val pos">+₹52,550</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="comp">
+        <div class="comp-head"><span class="name">Net band · Report (w/ target sub-row)</span><span class="tag">with deltas</span></div>
+        <div class="comp-stage">
+          <div class="net-band">
+            <div class="net-cell"><div class="label">Income</div><div class="val pos">₹85,000</div><div class="sub">target ₹85,000</div></div>
+            <div class="net-cell"><div class="label">Expense</div><div class="val">₹32,450</div><div class="sub">target ₹30,000</div></div>
+            <div class="net-cell"><div class="label">Net</div><div class="val pos">+₹52,550</div><div class="sub">target +₹55,000</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TRANSACTION ROW ===== -->
+  <div class="section">
+    <h2>Transaction row & card</h2>
+    <p class="note">Rows live inside a 16dp card. 3dp vertical color bar uses the category group color — gives instant visual scanning by group without needing a chip. Tap → edit sheet. Long-press → delete confirmation.</p>
+
+    <div class="comp">
+      <div class="comp-head"><span class="name">Transaction list card</span><span class="tag">card 16 · 3dp accent bar</span></div>
+      <div class="comp-stage">
+        <div class="txn-card">
+          <div class="txn-row">
+            <div class="txn-bar" style="background:#10b981"></div>
+            <div class="txn-main">
+              <div class="txn-title">Salary</div>
+              <div class="txn-sub">Income · Salary · 1 Jun</div>
+            </div>
+            <div class="txn-amt pos">+₹85,000.00</div>
+          </div>
+          <div class="txn-row">
+            <div class="txn-bar" style="background:#ef4444"></div>
+            <div class="txn-main">
+              <div class="txn-title">Electricity bill</div>
+              <div class="txn-sub">Bills · Electricity · 2 Jun</div>
+            </div>
+            <div class="txn-amt">₹2,340.50</div>
+          </div>
+          <div class="txn-row">
+            <div class="txn-bar" style="background:#f59e0b"></div>
+            <div class="txn-main">
+              <div class="txn-title">Groceries</div>
+              <div class="txn-sub">Household · Groceries · 4 Jun · big-basket order</div>
+            </div>
+            <div class="txn-amt">₹3,120.00</div>
+          </div>
+          <div class="txn-row">
+            <div class="txn-bar" style="background:#8b5cf6"></div>
+            <div class="txn-main">
+              <div class="txn-title">Dinner — Saira's</div>
+              <div class="txn-sub">Leisure · Dining · 5 Jun</div>
+            </div>
+            <div class="txn-amt">₹1,840.00</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== GROUP CARD & DELTA TABLE ===== -->
+  <div class="section">
+    <h2>Group card · target vs actual (Report)</h2>
+    <p class="note">Each group becomes one card. Header shows group dot + name + inferred kind + subtotal delta. Inside: category rows with target / actual / signed delta. The delta is the only colored element.</p>
+
+    <div class="comp-grid two">
+      <div class="comp">
+        <div class="comp-head"><span class="name">Group with overage</span><span class="tag">expense · over target</span></div>
+        <div class="comp-stage">
+          <div class="grp-card">
+            <div class="grp-head">
+              <div class="grp-dot" style="background:#ef4444"></div>
+              <div class="grp-name">Bills</div>
+              <div class="grp-kind">Expense</div>
+              <div class="grp-subtotal">₹10,200 / ₹9,500</div>
+              <span class="delta neg">+₹700</span>
+            </div>
+            <div class="ta-row">
+              <div class="name">Rent</div>
+              <div class="num">8,000</div>
+              <div class="num">8,000</div>
+              <div class="delta-cell"><span class="delta flat">0</span></div>
+            </div>
+            <div class="ta-row">
+              <div class="name">Electricity</div>
+              <div class="num">1,500</div>
+              <div class="num">2,200</div>
+              <div class="delta-cell"><span class="delta neg">+700</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="comp">
+        <div class="comp-head"><span class="name">Group on / under</span><span class="tag">expense · favorable</span></div>
+        <div class="comp-stage">
+          <div class="grp-card">
+            <div class="grp-head">
+              <div class="grp-dot" style="background:#8b5cf6"></div>
+              <div class="grp-name">Leisure</div>
+              <div class="grp-kind">Expense</div>
+              <div class="grp-subtotal">₹1,840 / ₹3,000</div>
+              <span class="delta pos">−₹1,160</span>
+            </div>
+            <div class="ta-row">
+              <div class="name">Dining</div>
+              <div class="num">3,000</div>
+              <div class="num">1,840</div>
+              <div class="delta-cell"><span class="delta pos">−1,160</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PLAN INPUT ROW ===== -->
+  <div class="section">
+    <h2>Plan input row</h2>
+    <p class="note">The Plan screen reuses the group card shell, but rows have an editable amount input on the right. Empty input = no target for that category this month. Tap-to-clear is one tap (so removing a target stays fast).</p>
+
+    <div class="comp">
+      <div class="comp-head"><span class="name">Plan group card</span><span class="tag">editable per row</span></div>
+      <div class="comp-stage">
+        <div class="grp-card">
+          <div class="grp-head">
+            <div class="grp-dot" style="background:#f59e0b"></div>
+            <div class="grp-name">Household</div>
+            <div class="grp-kind">Expense</div>
+            <div class="grp-subtotal" style="margin-left:auto">Target ₹7,500</div>
+          </div>
+          <div class="pl-row">
+            <div></div>
+            <div style="font-size:13.5px">Groceries</div>
+            <input class="pl-input" value="5,000"/>
+          </div>
+          <div class="pl-row">
+            <div></div>
+            <div style="font-size:13.5px">Transport</div>
+            <input class="pl-input" value="2,500"/>
+          </div>
+          <div class="pl-row">
+            <div></div>
+            <div style="font-size:13.5px">Cleaning supplies</div>
+            <input class="pl-input placeholder" value="—"/>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== RECURRING ===== -->
+  <div class="section">
+    <h2>Recurring template card</h2>
+    <p class="note">Card per template. Apply is a tonal button that flips to "Applied" + disabled state when <code style="background:var(--surface-2);padding:1px 6px;border-radius:4px;font-size:11px;">lastRunMonth == currentMonth</code> (idempotency guard §F5.4). Active switch + edit icon on the right.</p>
+
+    <div class="comp-grid two">
+      <div class="comp">
+        <div class="comp-head"><span class="name">Active · ready to apply</span><span class="tag">tonal CTA</span></div>
+        <div class="comp-stage">
+          <div class="rec-card">
+            <div class="rec-meta">
+              <div class="rec-title">Salary</div>
+              <div class="rec-sub"><span>Income</span><span class="sep"></span><span>Day 1</span><span class="sep"></span><span class="rec-amt">₹85,000</span></div>
+            </div>
+            <div class="rec-actions">
+              <button class="btn btn-tonal" style="padding:8px 14px;font-size:13px">Apply for June</button>
+              <button class="btn-icon"><svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="comp">
+        <div class="comp-head"><span class="name">Applied this month</span><span class="tag">idempotent · disabled</span></div>
+        <div class="comp-stage">
+          <div class="rec-card">
+            <div class="rec-meta">
+              <div class="rec-title">Rent</div>
+              <div class="rec-sub"><span>Bills</span><span class="sep"></span><span>Day 5</span><span class="sep"></span><span class="rec-amt">₹18,000</span></div>
+            </div>
+            <div class="rec-actions">
+              <span class="delta pos"><svg class="icon" viewBox="0 0 24 24" style="width:12px;height:12px"><path d="M5 12l5 5L20 7"/></svg> Applied Jun 5</span>
+              <button class="btn-icon"><svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== BANNER ===== -->
+  <div class="section">
+    <h2>Banners</h2>
+    <p class="note">Two variants: <strong style="color:var(--text);">Info</strong> (primary-container) for "pre-filled from last month" / first-run; <strong style="color:var(--text);">Highlight</strong> (tertiary amber-container) for due-this-month, gentle nudges. Dismissible, but stick by default — these carry context the user needs.</p>
+
+    <div class="comp-grid two">
+      <div class="comp">
+        <div class="comp-head"><span class="name">Pre-fill banner · Plan</span><span class="tag">info · primary-container</span></div>
+        <div class="comp-stage">
+          <div class="banner info">
+            <svg class="b-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <div class="b-body">
+              <div class="b-title">Pre-filled from May's targets</div>
+              <div>Tweak any row and tap Save to commit. We won't overwrite until you do.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="comp">
+        <div class="comp-head"><span class="name">Recurring due banner · Report</span><span class="tag">highlight · tertiary</span></div>
+        <div class="comp-stage">
+          <div class="banner">
+            <svg class="b-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <div class="b-body">
+              <div class="b-title">2 recurring entries due this month</div>
+              <div>Internet (Day 8), Phone (Day 15)</div>
+            </div>
+            <span class="b-action">Open</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== NARRATIVE ===== -->
+  <div class="section">
+    <h2>Narrative box</h2>
+    <p class="note">The deterministic one-to-three sentence summary (§6.4). Rendered with mixed weight: the headline figures are 600; surrounding prose 400. The over/under figure picks up the semantic color.</p>
+
+    <div class="comp">
+      <div class="comp-head"><span class="name">Narrative · over target</span><span class="tag">deterministic · no LLM</span></div>
+      <div class="comp-stage">
+        <div class="narrative">
+          <div class="nrt-label">Summary · June 2026</div>
+          <div class="nrt-text">In June, you spent <strong>₹32,450</strong> against a planned <strong>₹30,000</strong> — <span class="nrt-over">over by ₹2,450 (8%)</span>. Biggest overage: Electricity (₹2,200 vs ₹1,500). Biggest underspend: Dining (₹1,840 vs ₹3,000).</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TOP BAR + BNAV ===== -->
+  <div class="section">
+    <h2>Top bar & bottom navigation</h2>
+    <p class="note">Top bar carries month navigation on Log / Plan / Report (◀ June 2026 ▶) plus Settings gear on the far right. Bottom nav has 5 tabs with a primary-container pill behind the active icon.</p>
+
+    <div class="comp-grid two">
+      <div class="comp">
+        <div class="comp-head"><span class="name">Top app bar</span><span class="tag">month nav · gear</span></div>
+        <div class="comp-stage">
+          <div class="topbar">
+            <button class="btn-icon" style="width:32px;height:32px"><svg class="icon" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M15 18l-6-6 6-6"/></svg></button>
+            <div class="month-nav">
+              <span class="month-label">June 2026</span>
+            </div>
+            <button class="btn-icon" style="width:32px;height:32px"><svg class="icon" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M9 18l6-6-6-6"/></svg></button>
+            <button class="btn-icon" style="width:32px;height:32px"><svg class="icon" viewBox="0 0 24 24" style="width:16px;height:16px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+          </div>
+        </div>
+      </div>
+      <div class="comp">
+        <div class="comp-head"><span class="name">Bottom navigation</span><span class="tag">5 tabs · pill indicator</span></div>
+        <div class="comp-stage">
+          <div class="bnav">
+            <div class="bnav-item active"><span class="bnav-pill"><svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M3 12h4l2-7 4 14 2-7h6"/></svg></span><span class="bnav-label">Log</span></div>
+            <div class="bnav-item"><span class="bnav-pill"><svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M9 11l3 3 8-8M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span><span class="bnav-label">Plan</span></div>
+            <div class="bnav-item"><span class="bnav-pill"><svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M3 3v18h18M7 14l4-4 4 4 5-5"/></svg></span><span class="bnav-label">Report</span></div>
+            <div class="bnav-item"><span class="bnav-pill"><svg class="icon icon-lg" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span><span class="bnav-label">Categories</span></div>
+            <div class="bnav-item"><span class="bnav-pill"><svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-9-9 9 9 0 0 1 9-9c2.5 0 4.7 1 6.4 2.6L21 3"/><path d="M21 3v6h-6"/></svg></span><span class="bnav-label">Recurring</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CALCULATOR + DIALOG + SNACK ===== -->
+  <div class="section">
+    <h2>Calculator, sheets, snackbars</h2>
+    <p class="note">Calculator opens as a bottom sheet anchored to the amount field. Snackbars stack below the FAB. Confirmation dialogs use the same sheet shape with 20dp top corners.</p>
+
+    <div class="comp-grid three">
+      <div class="comp">
+        <div class="comp-head"><span class="name">Calculator popover</span><span class="tag">bottom sheet 20</span></div>
+        <div class="comp-stage center">
+          <div class="calc">
+            <div class="display">
+              <div class="expr">1200 + 240 ×</div>
+              <div>1,200.00</div>
+            </div>
+            <div class="calc-keys">
+              <div class="ckey clear">C</div>
+              <div class="ckey op">÷</div>
+              <div class="ckey op">×</div>
+              <div class="ckey op">−</div>
+              <div class="ckey">7</div>
+              <div class="ckey">8</div>
+              <div class="ckey">9</div>
+              <div class="ckey op eq">=</div>
+              <div class="ckey">4</div>
+              <div class="ckey">5</div>
+              <div class="ckey">6</div>
+              <div class="ckey">1</div>
+              <div class="ckey">2</div>
+              <div class="ckey">3</div>
+              <div class="ckey op">+</div>
+              <div class="ckey zero">0</div>
+              <div class="ckey">.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="comp">
+        <div class="comp-head"><span class="name">Confirmation sheet</span><span class="tag">archive · destructive</span></div>
+        <div class="comp-stage">
+          <div class="sheet">
+            <div class="sheet-handle"></div>
+            <h3>Archive "Dining"?</h3>
+            <p style="font-size: 13.5px; color: var(--muted); margin: 0 0 18px; line-height: 1.5;">Past Dining transactions will stay in your reports, but you won't be able to add new ones until you unarchive.</p>
+            <div style="display:flex; gap: 8px; justify-content: flex-end;">
+              <button class="btn btn-text">Cancel</button>
+              <button class="btn btn-error">Archive</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="comp">
+        <div class="comp-head"><span class="name">Snackbar</span><span class="tag">200ms ease-out</span></div>
+        <div class="comp-stage center" style="gap: 12px;">
+          <div class="snack">
+            Transaction saved.
+            <span class="s-action">Undo</span>
+          </div>
+          <div class="snack" style="background: var(--error-container); color: var(--error);">
+            Already applied this month.
+          </div>
+          <div class="snack">
+            Moved to June — viewing now.
+            <span class="s-action">Open</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== EMPTY STATES ===== -->
+  <div class="section">
+    <h2>Empty states</h2>
+    <p class="note">Every list has an empty state with a clear single CTA. Tone: warm, not chastising. No illustrations to keep weight low — a thin glyph and prose only.</p>
+
+    <div class="comp-grid three">
+      <div class="comp">
+        <div class="comp-head"><span class="name">Log · empty month</span><span class="tag">first transaction</span></div>
+        <div class="comp-stage">
+          <div class="empty">
+            <div class="e-glyph">＋</div>
+            <div class="e-title">No transactions in June</div>
+            <div class="e-sub">Tap the + button to log your first one. Income and expenses both land here.</div>
+            <button class="btn btn-filled" style="margin-top: 16px;">Add transaction</button>
+          </div>
+        </div>
+      </div>
+      <div class="comp">
+        <div class="comp-head"><span class="name">Plan · first time</span><span class="tag">no prior month</span></div>
+        <div class="comp-stage">
+          <div class="empty">
+            <div class="e-glyph">◇</div>
+            <div class="e-title">Set your first targets</div>
+            <div class="e-sub">Pick a monthly cap per category. Next month, June's targets will be pre-filled for you to tweak.</div>
+          </div>
+        </div>
+      </div>
+      <div class="comp">
+        <div class="comp-head"><span class="name">Report · nothing logged</span><span class="tag">narrative fallback</span></div>
+        <div class="comp-stage">
+          <div class="empty">
+            <div class="e-glyph">○</div>
+            <div class="e-title">In June, no transactions were logged.</div>
+            <div class="e-sub">Add a transaction to see your plan-vs-actual report build out.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

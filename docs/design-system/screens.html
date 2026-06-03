@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Budget Tracker · Screens v2</title>
+<style>
+  :root {
+    --bg: #0A1218;
+    --surface: #11191F;
+    --surface-2: #1A2229;
+    --surface-3: #243038;
+    --line: rgba(255,255,255,0.06);
+    --line-strong: rgba(255,255,255,0.12);
+    --text: #E0E7EC;
+    --text-dim: #C0C9D0;
+    --muted: #93A1AB;
+    --primary: #9CC8DE;
+    --primary-container: #143548;
+    --on-primary: #003547;
+    --on-primary-container: #C5E5F9;
+    --tertiary-container: #6A3B16;
+    --on-tertiary-container: #FFDDB6;
+    --error-container: #93000A;
+    --error: #FFB4A8;
+    --income: #74D9B5;
+    --overage: #FFB4A8;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #050A0E; color: var(--text); font-family: 'Inter', -apple-system, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  /* Global button reset — every <button> across the mockups */
+  button { background: transparent; border: none; padding: 0; margin: 0; font: inherit; color: inherit; cursor: pointer; -webkit-appearance: none; appearance: none; }
+
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 32px 28px 80px; }
+  .page-title { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; font-weight: 500; }
+  h1 { font-size: 32px; font-weight: 600; letter-spacing: -0.02em; margin: 0 0 8px; }
+  .lede { color: var(--muted); font-size: 15px; line-height: 1.55; max-width: 760px; margin: 0 0 36px; }
+  .changelog { display: inline-block; margin: 0 0 36px; padding: 10px 14px; background: var(--primary-container); color: var(--on-primary-container); border-radius: 12px; font-size: 12.5px; line-height: 1.55; }
+  .changelog strong { font-weight: 600; }
+
+  .screens-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 36px 24px; }
+  .screen-wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .screen-meta { text-align: center; }
+  .screen-meta .nm { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+  .screen-meta .desc { font-size: 11.5px; color: var(--muted); max-width: 280px; line-height: 1.45; }
+
+  /* PHONE FRAME */
+  .phone { width: 340px; height: 720px; background: var(--bg); border-radius: 34px; border: 1px solid rgba(255,255,255,0.08); padding: 8px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.45), 0 0 0 8px rgba(255,255,255,0.02); position: relative; }
+  /* Subtle top vignette — a faint brand-tinted light from the top of every screen */
+  .phone-inner {
+    width: 100%; height: 100%; border-radius: 26px; overflow: hidden; display: flex; flex-direction: column; position: relative;
+    background:
+      radial-gradient(ellipse 100% 60% at 50% -10%, rgba(28, 75, 105, 0.35) 0%, rgba(28, 75, 105, 0) 60%),
+      var(--bg);
+  }
+
+  /* Status bar */
+  .status-bar { padding: 8px 20px 4px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+  .status-bar .icons { display: flex; gap: 6px; align-items: center; }
+  .status-bar svg { width: 12px; height: 12px; }
+
+  /* Top bar */
+  .top-bar { padding: 8px 12px 8px; display: flex; align-items: center; gap: 4px; }
+  .top-bar .title { flex: 1; font-size: 18px; font-weight: 600; padding: 0 6px; color: var(--text); }
+  .top-bar.month-mode .title { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 0; }
+  .top-bar.month-mode .month-label { font-size: 16px; font-weight: 600; color: var(--text); }
+
+  /* Icon button — now properly transparent */
+  .ib { width: 36px; height: 36px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; color: var(--text-dim); background: transparent; }
+  .ib:hover { background: var(--surface-2); color: var(--text); }
+  .ib svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* Body scroll area — children must keep natural height; body scrolls when content overflows */
+  .body { flex: 1; min-height: 0; overflow-y: auto; padding: 4px 14px 14px; display: flex; flex-direction: column; gap: 12px; }
+  .body > * { flex-shrink: 0; }
+  .body::-webkit-scrollbar { display: none; }
+
+  /* Net band — hero element, gradient-rich */
+  .net-band {
+    border-radius: 18px; padding: 14px 16px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px;
+    background:
+      radial-gradient(ellipse 80% 100% at 0% 0%, rgba(123, 200, 230, 0.18) 0%, rgba(123, 200, 230, 0) 60%),
+      linear-gradient(135deg, #1B4561 0%, #143548 60%, #0F2A3D 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 6px 18px rgba(0, 0, 0, 0.18);
+  }
+  .net-cell { min-width: 0; }
+  .net-cell .label { display: flex; align-items: center; gap: 4px; font-size: 9.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--on-primary-container); opacity: 0.7; margin-bottom: 4px; font-weight: 500; white-space: nowrap; }
+  .net-cell .label svg { width: 10px; height: 10px; stroke: currentColor; fill: none; stroke-width: 2; }
+  .net-cell .val { font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -0.012em; color: var(--on-primary-container); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .net-cell .val.pos { color: var(--income); }
+  .net-cell .val.neg { color: var(--overage); }
+  .net-cell .sub { display: flex; align-items: center; gap: 3px; font-size: 10px; color: var(--on-primary-container); opacity: 0.6; margin-top: 3px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .net-cell .sub svg { width: 9px; height: 9px; stroke: currentColor; fill: none; stroke-width: 2; flex-shrink: 0; }
+
+  /* Chips */
+  .chips-row { display: flex; gap: 6px; padding: 4px 0; flex-wrap: wrap; }
+  .chip { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 500; border: 1px solid var(--line-strong); color: var(--text-dim); background: transparent; white-space: nowrap; flex-shrink: 0; }
+  .chip.selected { background: var(--primary-container); color: var(--on-primary-container); border-color: var(--primary-container); }
+  .chip-dot { width: 7px; height: 7px; border-radius: 50%; }
+
+  /* Section label */
+  .label-m { font-size: 10.5px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); padding: 4px 4px 0; }
+
+  /* === Transaction card — unified with inline date dividers === */
+  .txn-card { background: linear-gradient(180deg, #131A20 0%, #0F1619 100%); border: 1px solid rgba(255,255,255,0.04); border-radius: 16px; overflow: hidden; }
+  .txn-date { display: flex; align-items: center; gap: 8px; padding: 14px 14px 8px; font-size: 11px; color: var(--muted); position: relative; }
+  /* Stronger separator above each subsequent date section */
+  .txn-date:not(:first-child) { margin-top: 4px; border-top: 1px solid var(--line-strong); padding-top: 16px; }
+  .txn-date .date-day { color: var(--text); font-weight: 600; font-size: 12px; }
+  .txn-date .date-weekday { color: var(--muted); font-size: 10.5px; letter-spacing: 0.04em; text-transform: uppercase; }
+  .txn-date .date-sum { margin-left: auto; font-variant-numeric: tabular-nums; font-size: 11px; color: var(--text-dim); font-weight: 500; }
+  .txn-date + .txn-row { border-top: none; }
+  .txn-row { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-top: 1px solid var(--line); }
+  .txn-row:first-child { border-top: none; }
+  .txn-bar { width: 3px; align-self: stretch; border-radius: 2px; min-height: 28px; flex-shrink: 0; }
+  .txn-main { flex: 1; min-width: 0; }
+  .txn-title { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .txn-sub { font-size: 10.5px; color: var(--muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .txn-amt { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--text); white-space: nowrap; flex-shrink: 0; }
+  .txn-amt.pos { color: var(--income); }
+
+  /* Group card — soft top-light gradient */
+  .grp-card { background: linear-gradient(180deg, #131A20 0%, #0F1619 100%); border: 1px solid rgba(255,255,255,0.04); border-radius: 16px; padding: 4px; }
+  .grp-head { display: flex; align-items: center; gap: 8px; padding: 10px 12px; min-width: 0; }
+  .grp-dot { width: 8px; height: 8px; border-radius: 3px; flex-shrink: 0; }
+  .grp-name { flex: 1; min-width: 0; font-size: 12.5px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .grp-kind { font-size: 9px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); padding: 2px 8px; background: var(--surface-2); border-radius: 999px; flex-shrink: 0; white-space: nowrap; }
+  .grp-kind.income { background: rgba(116, 217, 181, 0.14); color: var(--income); }
+  .grp-kind.expense { background: rgba(255, 180, 168, 0.12); color: var(--overage); }
+  .delta.flat.income { background: rgba(116, 217, 181, 0.12); color: var(--income); }
+  .delta.flat.expense { background: rgba(255, 180, 168, 0.10); color: var(--overage); }
+  .grp-sub { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; flex-shrink: 0; }
+  .grp-sub svg { width: 10px; height: 10px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+  /* Delta */
+  .delta { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .delta.pos { background: rgba(116, 217, 181, 0.12); color: var(--income); }
+  .delta.neg { background: rgba(255, 180, 168, 0.12); color: var(--overage); }
+  .delta.flat { background: var(--surface-2); color: var(--muted); }
+
+  /* TA row — Plan muted + bullseye icon; Actual highlighted (bolder).
+     Grid columns are fixed-width so every column lines up across every row in every group card. */
+  .ta-row { display: grid; grid-template-columns: 1fr 72px 64px 64px; align-items: center; column-gap: 8px; padding: 8px 12px; border-top: 1px solid var(--line); }
+  .ta-row .name { font-size: 12px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ta-row .num { text-align: right; font-size: 11.5px; font-variant-numeric: tabular-nums; line-height: 1; }
+  .ta-row .num.target { color: var(--muted); font-weight: 400; display: flex; align-items: center; justify-content: flex-end; gap: 5px; }
+  .ta-row .num.target svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 2; flex-shrink: 0; opacity: 0.8; transform: translateY(0.5px); }
+  .ta-row .num.actual { color: var(--text); font-weight: 600; }
+  .ta-row .delta-cell { display: flex; justify-content: flex-end; align-items: center; }
+
+  /* Plan row */
+  .pl-row { display: grid; grid-template-columns: 1fr 110px; align-items: center; gap: 8px; padding: 8px 12px; border-top: 1px solid var(--line); }
+  .pl-row .name { font-size: 12px; color: var(--text); }
+  .pl-input { background: var(--surface-2); border: 1px solid transparent; border-radius: 8px; padding: 6px 10px; color: var(--text); font-family: inherit; font-size: 12px; font-weight: 500; font-variant-numeric: tabular-nums; text-align: right; outline: none; width: 100%; }
+  .pl-input.placeholder { color: var(--muted); font-weight: 400; }
+
+  /* Recurring */
+  .rec-card { background: linear-gradient(180deg, #131A20 0%, #0F1619 100%); border-radius: 16px; padding: 10px 12px; display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; border: 1px solid rgba(255,255,255,0.04); transition: background 150ms, border-color 150ms; }
+  .rec-meta { min-width: 0; }
+  .rec-meta .rec-title { font-size: 12.5px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rec-meta .rec-sub { font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 7px; margin-top: 2px; white-space: nowrap; overflow: hidden; }
+  .rec-meta .rec-sub .sep { width: 2.5px; height: 2.5px; border-radius: 50%; background: var(--muted); opacity: 0.5; flex-shrink: 0; }
+  .rec-meta .rec-amt { font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+  .rec-card.inactive { opacity: 0.5; }
+
+  /* Applied — visually recedes (soft green-tinted gradient) */
+  .rec-card.applied { background: linear-gradient(180deg, rgba(116, 217, 181, 0.10) 0%, rgba(116, 217, 181, 0.04) 100%); border-color: rgba(116, 217, 181, 0.18); }
+  .rec-card.applied .rec-title { color: var(--text-dim); font-weight: 500; }
+  .rec-card.applied .rec-meta .rec-amt { color: var(--text-dim); font-weight: 500; }
+  .rec-card .applied-mark { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 999px; background: rgba(116, 217, 181, 0.08); }
+  .rec-card .applied-mark .check { width: 18px; height: 18px; border-radius: 50%; background: linear-gradient(135deg, #95E5C5 0%, #5BC299 100%); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: inset 0 1px 0 rgba(255,255,255,0.3); }
+  .rec-card .applied-mark .check svg { width: 11px; height: 11px; stroke: var(--bg); fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+  .rec-card .applied-mark .date { font-size: 11px; color: var(--income); font-weight: 500; font-variant-numeric: tabular-nums; }
+
+  /* Buttons — subtle gradient elevation */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 500; padding: 8px 16px; border-radius: 999px; }
+  .btn.filled { background: linear-gradient(180deg, #B0DDED 0%, #9CC8DE 100%); color: var(--on-primary); box-shadow: inset 0 1px 0 rgba(255,255,255,0.25); }
+  .btn.tonal { background: linear-gradient(180deg, #1B4561 0%, #143548 100%); color: var(--on-primary-container); box-shadow: inset 0 1px 0 rgba(255,255,255,0.06); }
+  .btn.outline { background: transparent; color: var(--primary); border: 1px solid var(--line-strong); }
+  .btn.full { width: 100%; padding: 12px; font-size: 13.5px; font-weight: 600; }
+  .btn.disabled { background: var(--surface-2); color: var(--muted); cursor: not-allowed; }
+
+  /* Banner — subtle gradient */
+  .banner { display: flex; gap: 10px; padding: 10px 12px; border-radius: 12px; align-items: flex-start; font-size: 11.5px; line-height: 1.45; }
+  .banner.info { background: linear-gradient(135deg, #1B4561 0%, #143548 100%); color: var(--on-primary-container); box-shadow: inset 0 1px 0 rgba(255,255,255,0.06); }
+  .banner.amber { background: linear-gradient(135deg, #7B4520 0%, #5C3013 100%); color: var(--on-tertiary-container); box-shadow: inset 0 1px 0 rgba(255,255,255,0.06); }
+  .banner svg { width: 14px; height: 14px; flex-shrink: 0; margin-top: 1px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .banner .b-title { font-weight: 600; }
+  .banner .b-action { font-weight: 600; cursor: pointer; }
+
+  /* Narrative */
+  .narrative { background: linear-gradient(180deg, #131A20 0%, #0F1619 100%); border: 1px solid rgba(255,255,255,0.04); border-radius: 16px; padding: 12px 14px; }
+  .narrative .nrt-label { font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .narrative .nrt-text { font-size: 12.5px; line-height: 1.55; color: var(--text); }
+  .narrative .nrt-text strong { font-weight: 600; }
+  .narrative .nrt-text .over { color: var(--overage); font-weight: 600; }
+
+  /* Bottom nav */
+  .bnav { background: linear-gradient(180deg, #131A20 0%, #0E1419 100%); padding: 6px 6px 14px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; border-top: 1px solid var(--line); }
+  .bnav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 0; }
+  .bnav-pill { width: 46px; height: 26px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; color: var(--muted); }
+  .bnav-pill svg { width: 16px; height: 16px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .bnav-item.active .bnav-pill { background: linear-gradient(180deg, #1B4561 0%, #143548 100%); color: var(--on-primary-container); box-shadow: inset 0 1px 0 rgba(255,255,255,0.08); }
+  .bnav-item.active .bnav-pill svg { stroke-width: 2.2; }
+  .bnav-label { font-size: 9px; color: var(--muted); font-weight: 500; }
+  .bnav-item.active .bnav-label { color: var(--text); font-weight: 600; }
+
+  /* FAB — gradient + lift */
+  .fab {
+    position: absolute; right: 18px; bottom: 78px;
+    background: linear-gradient(135deg, #2A5E80 0%, #1B4561 50%, #143548 100%);
+    color: var(--on-primary-container); padding: 12px 18px; border-radius: 18px; font-weight: 600; font-size: 13px;
+    display: inline-flex; align-items: center; gap: 6px;
+    box-shadow: 0 8px 20px rgba(13, 39, 54, 0.55), inset 0 1px 0 rgba(255,255,255,0.12);
+  }
+  .fab svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2.2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* Sticky save bar */
+  .sticky-bar { position: absolute; bottom: 70px; left: 14px; right: 14px; background: linear-gradient(180deg, #1A2229 0%, #131A20 100%); border-radius: 16px; padding: 10px 12px; display: flex; align-items: center; gap: 10px; box-shadow: 0 8px 22px rgba(0,0,0,0.55); border: 1px solid var(--line-strong); }
+  .sticky-bar .lbl { flex: 1; font-size: 11.5px; color: var(--muted); }
+
+  /* Settings */
+  .settings-row { background: transparent; padding: 14px 14px; display: flex; align-items: center; gap: 12px; min-height: 52px; }
+  .settings-row + .settings-row { border-top: 1px solid var(--line); }
+  .settings-group { background: linear-gradient(180deg, #131A20 0%, #0F1619 100%); border: 1px solid rgba(255,255,255,0.04); border-radius: 16px; overflow: hidden; }
+  .settings-row .s-icon { width: 32px; height: 32px; background: var(--surface-2); border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; color: var(--text-dim); flex-shrink: 0; }
+  .settings-row .s-icon svg { width: 16px; height: 16px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .settings-row .s-main { flex: 1; min-width: 0; }
+  .settings-row .s-title { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3; }
+  .settings-row .s-sub { font-size: 11px; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3; }
+  .settings-row .s-value { font-size: 12.5px; color: var(--text-dim); font-weight: 500; white-space: nowrap; flex-shrink: 0; }
+  .sw-mini { width: 34px; height: 20px; border-radius: 999px; background: var(--primary); position: relative; }
+  .sw-mini .t { position: absolute; right: 2px; top: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--on-primary); }
+  .sw-mini.off { background: var(--surface-3); }
+  .sw-mini.off .t { left: 2px; right: auto; background: var(--muted); }
+
+  /* Drag handle — six-dot reorder grip */
+  .drag-handle { width: 16px; height: 16px; color: var(--muted); display: inline-flex; align-items: center; justify-content: center; opacity: 0.7; }
+  .drag-handle svg { width: 14px; height: 14px; fill: currentColor; }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <p class="page-title">Budget Tracker · §3 Screens · v15</p>
+  <h1>Six screens — revised</h1>
+  <p class="lede">v15: Recurring rebalanced — 3-dot overflow icon dropped from applied rows; every card now has exactly one element on the right.</p>
+  <div class="changelog">
+    <strong>Where gradients live in v13 (restraint &gt; everywhere):</strong><br/>
+    1 · <strong>Net band</strong> — diagonal navy gradient (<code>#1B4561 → #143548 → #0F2A3D</code>) + a soft top-left brand-light glow + inset top highlight + drop shadow. The hero element now reads as <em>lit</em>, not flat.<br/>
+    2 · <strong>FAB</strong> — three-stop diagonal (<code>#2A5E80 → #1B4561 → #143548</code>) + inner top highlight + a navy-tinted drop shadow. Reads as a tactile pill.<br/>
+    3 · <strong>Filled / tonal buttons</strong> — 180° gradient (lighter top → tone bottom) + inset highlight. Catch the eye but not flashy.<br/>
+    4 · <strong>Card surfaces</strong> (txn, group, recurring, narrative, settings-group) — every card switched from flat <code>--surface</code> to a subtle <code>#131A20 → #0F1619</code> top-light. ~3% lift at the top of each card.<br/>
+    5 · <strong>Bottom-nav active pill</strong> — same navy gradient as tonal button, with inset highlight.<br/>
+    6 · <strong>Banners</strong> — info gets the navy gradient, amber-highlight gets a warm <code>#7B4520 → #5C3013</code> gradient. Inset highlight on both.<br/>
+    7 · <strong>Phone background</strong> — radial top-light <code>rgba(28, 75, 105, 0.35)</code> ellipse from <code>(50%, -10%)</code>, fades to base black. Subtle brand-tinted atmospheric wash.<br/>
+    8 · <strong>Applied recurring</strong> — green tint became a vertical gradient (10% → 4% opacity). Applied check circle uses a green diagonal gradient for a tiny "polished button" feel.<br/><br/>
+    <strong>Restraint:</strong> Plan/Actual numbers, ta-rows, txn-rows, settings-rows, chips, deltas — kept flat. Gradients are reserved for surfaces and interactive containers, not for data.
+  </div>
+
+  <div class="screens-grid">
+
+    <!-- ============== LOG ============== -->
+    <div class="screen-wrap">
+      <div class="phone"><div class="phone-inner">
+        <div class="status-bar"><span>9:41</span><div class="icons"><span>100%</span></div></div>
+        <div class="top-bar month-mode">
+          <button class="ib"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+          <div class="title"><span class="month-label">June 2026</span></div>
+          <button class="ib"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
+          <button class="ib"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9 1.65 1.65 0 0 0 4.27 7.18l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 15 4.6h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0A1.65 1.65 0 0 0 20.91 10H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+        </div>
+        <div class="body">
+          <div class="net-band">
+            <div class="net-cell"><div class="label">Income</div><div class="val pos">₹85k</div></div>
+            <div class="net-cell"><div class="label">Expense</div><div class="val">₹32.5k</div></div>
+            <div class="net-cell"><div class="label">Net</div><div class="val pos">+₹52.5k</div></div>
+          </div>
+          <div class="chips-row">
+            <span class="chip selected">All · 14</span>
+            <span class="chip">Income · 2</span>
+            <span class="chip">Expense · 12</span>
+          </div>
+
+          <!-- One card per date — same pattern as Plan's group cards -->
+          <div class="grp-card">
+            <div class="grp-head">
+              <div class="grp-name">Jun 5</div>
+              <div class="grp-kind">Thu</div>
+              <div class="grp-sub" style="margin-left:auto">−₹6.8k</div>
+            </div>
+            <div class="txn-row"><div class="txn-bar" style="background:#8b5cf6"></div><div class="txn-main"><div class="txn-title">Dinner — Saira's</div><div class="txn-sub">Leisure · Dining</div></div><div class="txn-amt">₹1,840</div></div>
+            <div class="txn-row"><div class="txn-bar" style="background:#0ea5e9"></div><div class="txn-main"><div class="txn-title">SIP — Index fund</div><div class="txn-sub">Savings</div></div><div class="txn-amt">₹5,000</div></div>
+          </div>
+
+          <div class="grp-card">
+            <div class="grp-head">
+              <div class="grp-name">Jun 4</div>
+              <div class="grp-kind">Wed</div>
+              <div class="grp-sub" style="margin-left:auto">−₹3.1k</div>
+            </div>
+            <div class="txn-row"><div class="txn-bar" style="background:#f59e0b"></div><div class="txn-main"><div class="txn-title">Groceries</div><div class="txn-sub">Household · big-basket</div></div><div class="txn-amt">₹3,120</div></div>
+          </div>
+
+          <div class="grp-card">
+            <div class="grp-head">
+              <div class="grp-name">Jun 2</div>
+              <div class="grp-kind">Mon</div>
+              <div class="grp-sub" style="margin-left:auto">−₹3.5k</div>
+            </div>
+            <div class="txn-row"><div class="txn-bar" style="background:#ef4444"></div><div class="txn-main"><div class="txn-title">Electricity bill</div><div class="txn-sub">Bills · UPI to BESCOM</div></div><div class="txn-amt">₹2,340</div></div>
+            <div class="txn-row"><div class="txn-bar" style="background:#f59e0b"></div><div class="txn-main"><div class="txn-title">Transport</div><div class="txn-sub">Household · Metro recharge</div></div><div class="txn-amt">₹1,200</div></div>
+          </div>
+
+          <div class="grp-card">
+            <div class="grp-head">
+              <div class="grp-name">Jun 1</div>
+              <div class="grp-kind">Sun</div>
+              <div class="grp-sub" style="margin-left:auto; color:var(--income)">+₹85k</div>
+            </div>
+            <div class="txn-row"><div class="txn-bar" style="background:#10b981"></div><div class="txn-main"><div class="txn-title">Salary</div><div class="txn-sub">Income</div></div><div class="txn-amt pos">+₹85,000</div></div>
+          </div>
+
+          <div style="height: 80px"></div>
+        </div>
+        <div class="fab"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Add</div>
+        <div class="bnav">
+          <div class="bnav-item active"><span class="bnav-pill"><svg viewBox="0 0 24 24"><path d="M3 12h4l2-7 4 14 2-7h6"/></svg></span><span class="bnav-label">Log</span></div>
+          <div class="bnav-item"><span class="bnav-pill"><svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span><span class="bnav-label">Plan</span></div>
+          <div class="bnav-item"><span class="bnav-pill"><svg viewBox="0 0 24 24"><path d="M3 3v18h18M7 14l4-4 4 4 5-5"/></svg></span><span class="bnav-label">Report</span></div>
+          <div class="bnav-item"><span class="bnav-pill"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span><span class="bnav-label">Cats</span></div>
+          <div class="bnav-item"><span class="bnav-pill"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-9-9 9 9 0 0 1 9-9c2.5 0 4.7 1 6.4 2.6L21 3"/><path d="M21 3v6h-6"/></svg></span><span class="bnav-label">Recur</span></div>
+        </div>
+      </div></div>
+      <div class="screen-meta">
+        <div class="nm">Log</div>
+        <div class="desc">One unified card. Each date has its own inline header with the day's net. Smooth scroll rhythm.</div>
+      </div>
+    </div>
+
+    <!-- ============== PLAN ============== -->
+    <div class="screen-wrap">
+      <div class="phone"><div class="phone-inner">
+        <div class="status-bar"><span>9:41</span><div class="icons"><span>100%</span></div></div>
+        <div class="top-bar month-mode">
+          <button class="ib"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+          <div class="title"><span class="month-label">June 2026</span></div>
+          <button class="ib"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
+          <button class="ib"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9 1.65 1.65 0 0 0 4.27 7.18l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 15 4.6h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0A1.65 1.65 0 0 0 20.91 10H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+        </div>
+        <div class="body">
+          <div class="banner info">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+            <div><div class="b-title">Pre-filled from May's targets</div>Edit and Save to commit June.</div>
+          </div>
+          <div class="net-band">
+            <div class="net-cell"><div class="label"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg> Income</div><div class="val pos">₹85k</div></div>
+            <div class="net-cell"><div class="label"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg> Expense</div><div class="val">₹30k</div></div>
+            <div class="net-cell"><div class="label"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg> Net</div><div class="val pos">+₹55k</div></div>
+          </div>
+          <div class="label-m">Income</div>
+          <div class="grp-card">
+            <div class="grp-head"><div class="grp-dot" style="background:#10b981"></div><div class="grp-name">Income</div><div class="grp-kind income">Inc</div><div class="grp-sub" style="margin-left:auto"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>₹85k</div></div>
+            <div class="pl-row"><div class="name">Salary</div><input class="pl-input" value="85,000"/></div>
+          </div>
+          <div class="label-m">Expense groups</div>
+          <div class="grp-card">
+            <div class="grp-head"><div class="grp-dot" style="background:#ef4444"></div><div class="grp-name">Bills</div><div class="grp-kind expense">Exp</div><div class="grp-sub" style="margin-left:auto"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>₹9.5k</div></div>
+            <div class="pl-row"><div class="name">Rent</div><input class="pl-input" value="8,000"/></div>
+            <div class="pl-row"><div class="name">Electricity</div><input class="pl-input" value="1,500"/></div>
+          </div>
+          <div class="grp-card">
+            <div class="grp-head"><div class="grp-dot" style="background:#f59e0b"></div><div class="grp-name">Household</div><div class="grp-kind expense">Exp</div><div class="grp-sub" style="margin-left:auto"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>₹7.5k</div></div>
+            <div class="pl-row"><div class="name">Groceries</div><input class="pl-input" value="5,000"/></div>
+            <div class="pl-row"><div class="name">Transport</div><input class="pl-input" value="2,500"/></div>
+          </div>
+          <div class="grp-card">
+            <div class="grp-head"><div class="grp-dot" style="background:#8b5cf6"></div><div class="grp-name">Leisure</div><div class="grp-kind expense">Exp</div><div class="grp-sub" style="margin-left:auto"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>₹3k</div></div>
+            <div class="pl-row"><div class="name">Dining</div><input class="pl-input" value="3,000"/></div>
+          </div>
+          <div style="height: 80px"></div>
+        </div>
+        <div class="sticky-bar">
+          <div class="lbl">7 targets · 1 unchanged</div>
+          <button class="btn filled">Save targets</button>
+        </div>
+        <div class="bnav">
+          <div class="bnav-item"><span class="bnav-pill"><svg viewBox="0 0 24 24"><path d="M3 12h4l2-7 4 14 2-7h6"/></svg></span><span class="bnav-label">Log</span></div>
+          <div class="bnav-item active"><span class="bnav-pill"><svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span><span class="bnav-label">Plan</span></div>
+          <div class="bnav-item"><span class="bnav-pill"><svg viewBox="0 0 24 24"><path d="M3 3v18h18M7 14l4-4 4 4 5-5"/></svg></span><span class="bnav-label">Report</span></div>
+          <div class="bnav-item"><span class="bnav-pill"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span><span class="bnav-label">Cats</span></div>
+          <div class="bnav-item"><span class="bnav-pill"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-9-9 9 9 0 0 1 9-9c2.5 0 4.7 1 6.4 2.6L21 3"/><path d="M21 3v6h-6"/></svg></span><span class="bnav-label">Recur</span></div>
+        </div>
+      </div></div>
+      <div class="screen-meta">
+        <div class="nm">Plan</div>
+        <div class="desc">Targets per category. Carry-forward banner. Sticky Save bar above nav.</div>
+      </div>
+    </div>
+
+    <!-- ============== REPORT ============== -->
+    <div class="screen-wrap">
+      <div class="phone"><div class="phone-inner">
+        <div class="status-bar"><span>9:41</span><div class="icons"><span>100%</span></div></div>
+        <div class="top-bar month-mode">
+          <button class="ib"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+          <div class="title"><span class="month-label">June 2026</span></div>
+          <button class="ib"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
+          <button class="ib"><svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg></button>
+          <button class="ib"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9 1.65 1.65 0 0 0 4.27 7.18l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 15 4.6h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0A1.65 1.65 0 0 0 20.91 10H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+        </div>
+        <div class="body">
+          <div class="narrative">
+            <div class="nrt-label">Summary · June 2026</div>
+            <div class="nrt-text">In June, you spent <strong>₹32,450</strong> against a planned <strong>₹30,000</strong> — <span class="over">over by ₹2,450 (8%)</span>. Biggest overage: Electricity (₹2,200 vs ₹1,500). Biggest underspend: Dining (₹1,840 vs ₹3,000).</div>
+          </div>
+          <div class="net-band">
+            <div class="net-cell"><div class="label">Income</div><div class="val pos">₹85k</div><div class="sub"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>Plan&nbsp;₹85k</div></div>
+            <div class="net-cell"><div class="label">Expense</div><div class="val">₹32.5k</div><div class="sub"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>Plan&nbsp;₹30k</div></div>
+            <div class="net-cell"><div class="label">Net</div><div class="val pos">+₹52.5k</div><div class="sub"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>Plan&nbsp;+₹55k</div></div>
+          </div>
+          <div class="banner amber">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <div style="flex:1"><div class="b-title">2 recurring due this month</div>Internet (Day 8), Phone (Day 15)</div>
+            <span class="b-action">Open</span>
+          </div>
+          <div class="grp-card">
+            <div class="grp-head"><div class="grp-dot" style="background:#ef4444"></div><div class="grp-name">Bills</div><div class="grp-kind expense">Exp</div><span class="delta neg" style="margin-left:auto">+₹700</span></div>
+            <div class="ta-row"><div class="name">Rent</div><div class="num target"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>8,000</div><div class="num actual">8,000</div><div class="delta-cell"><span class="delta flat">0</span></div></div>
+            <div class="ta-row"><div class="name">Electricity</div><div class="num target"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>1,500</div><div class="num actual">2,200</div><div class="delta-cell"><span class="delta neg">+700</span></div></div>
+          </div>
+          <div class="grp-card">
+            <div class="grp-head"><div class="grp-dot" style="background:#f59e0b"></div><div class="grp-name">Household</div><div class="grp-kind expense">Exp</div><span class="delta neg" style="margin-left:auto">+₹1,820</span></div>
+            <div class="ta-row"><div class="name">Groceries</div><div class="num target"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>5,000</div><div class="num actual">6,320</div><div class="delta-cell"><span class="delta neg">+1,320</span></div></div>
+            <div class="ta-row"><div class="name">Transport</div><div class="num target"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>2,500</div><div class="num actual">3,000</div><div class="delta-cell"><span class="delta neg">+500</span></div></div>
+          </div>
+          <div class="grp-card">
+            <div class="grp-head"><div class="grp-dot" style="background:#8b5cf6"></div><div class="grp-name">Leisure</div><div class="grp-kind expense">Exp</div><span class="delta pos" style="margin-left:auto">−₹1,160</span></div>
+            <div class="ta-row"><div class="name">Dining</div><div class="num target"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>3,000</div><div class="num actual">1,840</div><div class="delta-cell"><span class="delta pos">−1,160</span></div></div>
+          </div>
+          <div style="display:flex; gap: 8px; padding-top: 4px;">
+            <button class="btn tonal" style="flex:1">Excel</button>
+            <button class="btn tonal" style="flex:1">PDF</button>
+            <button class="btn filled" style="flex:1">Share</button>
+          </div>
+          <div style="height: 12px"></div>
+        </div>
+        <div class="bnav">
+          <div class="bnav-item"><span class="bnav-pill"><svg viewBox="0 0 24 24"><path d="M3 12h4l2-7 4 14 2-7h6"/></svg></span><span class="bnav-label">Log</span></div>
+          <div class="bnav-item"><span class="bnav-pill"><svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span><span class="bnav-label">Plan</span></div>
+          <div class="bnav-item active"><span class="bnav-pill"><svg viewBox="0 0 24 24"><path d="M3 3v18h18M7 14l4-4 4 4 5-5"/></svg></span><span class="bnav-label">Report</span></div>
+          <div class="bnav-item"><span class="bnav-pill"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span><span class="bnav-label">Cats</span></div>
+          <div class="bnav-item"><span class="bnav-pill"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-9-9 9 9 0 0 1 9-9c2.5 0 4.7 1 6.4 2.6L21 3"/><path d="M21 3v6h-6"/></svg></span><span class="bnav-label">Recur</span></div>
+        </div>
+      </div></div>
+      <div class="screen-meta">
+        <div class="nm">Report</div>
+        <div class="desc">Narrative, target-augmented Net band, recurring-due banner, group deltas, export.</div>
+      </div>
+    </div>
+
+    <!-- ============== CATEGORIES ============== -->
+    <div class="screen-wrap">
+      <div class="phone"><div class="phone-inner">
+        <div class="status-bar"><span>9:41</span><div class="icons"><span>100%</span></div></div>
+        <div class="top-bar">
+          <div class="title">Categories</div>
+          <button class="ib"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg></button>
+          <button class="ib"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9 1.65 1.65 0 0 0 4.27 7.18l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 15 4.6h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0A1.65 1.65 0 0 0 20.91 10H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+        </div>
+        <div class="body">
+          <div class="chips-row">
+            <span class="chip selected">All</span>
+            <span class="chip">Income</span>
+            <span class="chip">Expense</span>
+            <span class="chip">Archived</span>
+          </div>
+          <div class="grp-card">
+            <div class="grp-head"><div class="grp-dot" style="background:#10b981"></div><div class="grp-name">Income</div><div class="grp-kind income">Inc</div><div class="grp-sub">1</div><span class="drag-handle"><svg viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></span></div>
+            <div class="pl-row"><div class="name">Salary</div><span class="drag-handle" style="justify-self:end"><svg viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></span></div>
+          </div>
+          <div class="grp-card">
+            <div class="grp-head"><div class="grp-dot" style="background:#ef4444"></div><div class="grp-name">Bills</div><div class="grp-kind expense">Exp</div><div class="grp-sub">2</div><span class="drag-handle"><svg viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></span></div>
+            <div class="pl-row"><div class="name">Rent</div><span class="drag-handle" style="justify-self:end"><svg viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></span></div>
+            <div class="pl-row"><div class="name">Electricity</div><span class="drag-handle" style="justify-self:end"><svg viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></span></div>
+          </div>
+          <div class="grp-card">
+            <div class="grp-head"><div class="grp-dot" style="background:#f59e0b"></div><div class="grp-name">Household</div><div class="grp-kind expense">Exp</div><div class="grp-sub">2</div><span class="drag-handle"><svg viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></span></div>
+            <div class="pl-row"><div class="name">Groceries</div><span class="drag-handle" style="justify-self:end"><svg viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></span></div>
+            <div class="pl-row"><div class="name">Transport</div><span class="drag-handle" style="justify-self:end"><svg viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></span></div>
+          </div>
+          <div class="grp-card">
+            <div class="grp-head"><div class="grp-dot" style="background:#8b5cf6"></div><div class="grp-name">Leisure</div><div class="grp-kind expense">Exp</div><div class="grp-sub">1</div><span class="drag-handle"><svg viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></span></div>
+            <div class="pl-row"><div class="name">Dining</div><span class="drag-handle" style="justify-self:end"><svg viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></span></div>
+          </div>
+          <div style="height: 80px"></div>
+        </div>
+        <div class="fab"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> New</div>
+        <div class="bnav">
+          <div class="bnav-item"><span class="bnav-pill"><svg viewBox="0 0 24 24"><path d="M3 12h4l2-7 4 14 2-7h6"/></svg></span><span class="bnav-label">Log</span></div>
+          <div class="bnav-item"><span class="bnav-pill"><svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span><span class="bnav-label">Plan</span></div>
+          <div class="bnav-item"><span class="bnav-pill"><svg viewBox="0 0 24 24"><path d="M3 3v18h18M7 14l4-4 4 4 5-5"/></svg></span><span class="bnav-label">Report</span></div>
+          <div class="bnav-item active"><span class="bnav-pill"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span><span class="bnav-label">Cats</span></div>
+          <div class="bnav-item"><span class="bnav-pill"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-9-9 9 9 0 0 1 9-9c2.5 0 4.7 1 6.4 2.6L21 3"/><path d="M21 3v6h-6"/></svg></span><span class="bnav-label">Recur</span></div>
+        </div>
+      </div></div>
+      <div class="screen-meta">
+        <div class="nm">Categories</div>
+        <div class="desc">Group cards expanded with drag handles. Archive via long-press → confirm sheet.</div>
+      </div>
+    </div>
+
+    <!-- ============== RECURRING ============== -->
+    <div class="screen-wrap">
+      <div class="phone"><div class="phone-inner">
+        <div class="status-bar"><span>9:41</span><div class="icons"><span>100%</span></div></div>
+        <div class="top-bar">
+          <div class="title">Recurring</div>
+          <button class="ib"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9 1.65 1.65 0 0 0 4.27 7.18l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 15 4.6h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0A1.65 1.65 0 0 0 20.91 10H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+        </div>
+        <div class="body">
+          <div class="banner amber">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <div style="flex:1"><div class="b-title">2 templates due for June</div>Internet (Day 8), Phone (Day 15)</div>
+          </div>
+
+          <div class="label-m">Active · 4</div>
+          <div class="rec-card applied">
+            <div class="rec-meta">
+              <div class="rec-title">Salary</div>
+              <div class="rec-sub"><span>Income</span><span class="sep"></span><span>Day 1</span><span class="sep"></span><span class="rec-amt">₹85,000</span></div>
+            </div>
+            <span class="applied-mark"><span class="check"><svg viewBox="0 0 24 24"><path d="M5 12l4 4L19 7"/></svg></span><span class="date">Jun 1</span></span>
+          </div>
+          <div class="rec-card applied">
+            <div class="rec-meta">
+              <div class="rec-title">Rent</div>
+              <div class="rec-sub"><span>Bills</span><span class="sep"></span><span>Day 5</span><span class="sep"></span><span class="rec-amt">₹18,000</span></div>
+            </div>
+            <span class="applied-mark"><span class="check"><svg viewBox="0 0 24 24"><path d="M5 12l4 4L19 7"/></svg></span><span class="date">Jun 5</span></span>
+          </div>
+          <div class="rec-card">
+            <div class="rec-meta">
+              <div class="rec-title">Internet</div>
+              <div class="rec-sub"><span>Bills</span><span class="sep"></span><span>Day 8</span><span class="sep"></span><span class="rec-amt">₹1,200</span></div>
+            </div>
+            <button class="btn tonal" style="padding:7px 12px; font-size:12px;">Apply</button>
+          </div>
+          <div class="rec-card">
+            <div class="rec-meta">
+              <div class="rec-title">Phone</div>
+              <div class="rec-sub"><span>Bills</span><span class="sep"></span><span>Day 15</span><span class="sep"></span><span class="rec-amt">₹699</span></div>
+            </div>
+            <button class="btn tonal" style="padding:7px 12px; font-size:12px;">Apply</button>
+          </div>
+
+          <div class="label-m">Inactive · 1</div>
+          <div class="rec-card inactive">
+            <div class="rec-meta">
+              <div class="rec-title">Gym</div>
+              <div class="rec-sub"><span>Leisure</span><span class="sep"></span><span>Day 10</span><span class="sep"></span><span class="rec-amt">₹2,500</span></div>
+            </div>
+            <button class="btn disabled" style="padding:7px 12px; font-size:12px;">Inactive</button>
+          </div>
+          <div style="height: 80px"></div>
+        </div>
+        <div class="fab"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> New</div>
+        <div class="bnav">
+          <div class="bnav-item"><span class="bnav-pill"><svg viewBox="0 0 24 24"><path d="M3 12h4l2-7 4 14 2-7h6"/></svg></span><span class="bnav-label">Log</span></div>
+          <div class="bnav-item"><span class="bnav-pill"><svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span><span class="bnav-label">Plan</span></div>
+          <div class="bnav-item"><span class="bnav-pill"><svg viewBox="0 0 24 24"><path d="M3 3v18h18M7 14l4-4 4 4 5-5"/></svg></span><span class="bnav-label">Report</span></div>
+          <div class="bnav-item"><span class="bnav-pill"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span><span class="bnav-label">Cats</span></div>
+          <div class="bnav-item active"><span class="bnav-pill"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-9-9 9 9 0 0 1 9-9c2.5 0 4.7 1 6.4 2.6L21 3"/><path d="M21 3v6h-6"/></svg></span><span class="bnav-label">Recur</span></div>
+        </div>
+      </div></div>
+      <div class="screen-meta">
+        <div class="nm">Recurring</div>
+        <div class="desc">Templates grouped Active / Inactive. Apply or "Applied" pill. Due banner up top.</div>
+      </div>
+    </div>
+
+    <!-- ============== SETTINGS ============== -->
+    <div class="screen-wrap">
+      <div class="phone"><div class="phone-inner">
+        <div class="status-bar"><span>9:41</span><div class="icons"><span>100%</span></div></div>
+        <div class="top-bar">
+          <button class="ib"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+          <div class="title">Settings</div>
+        </div>
+        <div class="body">
+          <div class="label-m">Money</div>
+          <div class="settings-group">
+            <div class="settings-row">
+              <div class="s-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8M12 6v2m0 8v2"/></svg></div>
+              <div class="s-main"><div class="s-title">Currency</div><div class="s-sub">Used everywhere · ISO-4217</div></div>
+              <div class="s-value">INR · ₹</div>
+              <svg viewBox="0 0 24 24" style="width:14px;height:14px; color: var(--muted)" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+            </div>
+          </div>
+
+          <div class="label-m">Appearance</div>
+          <div class="settings-group">
+            <div class="settings-row">
+              <div class="s-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></div>
+              <div class="s-main"><div class="s-title">Theme</div><div class="s-sub">Follows your system setting</div></div>
+              <div class="s-value">System</div>
+              <svg viewBox="0 0 24 24" style="width:14px;height:14px; color: var(--muted)" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+            </div>
+            <div class="settings-row">
+              <div class="s-icon"><svg viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></div>
+              <div class="s-main"><div class="s-title">Dynamic color</div><div class="s-sub">From wallpaper · Android 12+</div></div>
+              <div class="sw-mini off"><div class="t"></div></div>
+            </div>
+            <div class="settings-row">
+              <div class="s-icon"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="3" rx="1"/><rect x="3" y="11" width="18" height="3" rx="1"/><rect x="3" y="16" width="18" height="3" rx="1"/></svg></div>
+              <div class="s-main"><div class="s-title">Density</div><div class="s-sub">Row height in lists</div></div>
+              <div class="s-value">Comfortable</div>
+              <svg viewBox="0 0 24 24" style="width:14px;height:14px; color: var(--muted)" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+            </div>
+          </div>
+
+          <div class="label-m">Data</div>
+          <div class="settings-group">
+            <div class="settings-row">
+              <div class="s-icon"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg></div>
+              <div class="s-main"><div class="s-title">Export current month</div><div class="s-sub">Excel + PDF via share sheet</div></div>
+              <svg viewBox="0 0 24 24" style="width:14px;height:14px; color: var(--muted)" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+            </div>
+          </div>
+
+          <div class="label-m">About</div>
+          <div class="settings-group">
+            <div class="settings-row">
+              <div class="s-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg></div>
+              <div class="s-main"><div class="s-title">Version</div><div class="s-sub">Local-only · v1.0.0</div></div>
+            </div>
+            <div class="settings-row">
+              <div class="s-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+              <div class="s-main"><div class="s-title">Privacy</div><div class="s-sub">No accounts. No network. No analytics.</div></div>
+            </div>
+          </div>
+
+          <div style="height: 80px"></div>
+        </div>
+        <div class="bnav">
+          <div class="bnav-item"><span class="bnav-pill"><svg viewBox="0 0 24 24"><path d="M3 12h4l2-7 4 14 2-7h6"/></svg></span><span class="bnav-label">Log</span></div>
+          <div class="bnav-item"><span class="bnav-pill"><svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span><span class="bnav-label">Plan</span></div>
+          <div class="bnav-item"><span class="bnav-pill"><svg viewBox="0 0 24 24"><path d="M3 3v18h18M7 14l4-4 4 4 5-5"/></svg></span><span class="bnav-label">Report</span></div>
+          <div class="bnav-item"><span class="bnav-pill"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span><span class="bnav-label">Cats</span></div>
+          <div class="bnav-item"><span class="bnav-pill"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-9-9 9 9 0 0 1 9-9c2.5 0 4.7 1 6.4 2.6L21 3"/><path d="M21 3v6h-6"/></svg></span><span class="bnav-label">Recur</span></div>
+        </div>
+      </div></div>
+      <div class="screen-meta">
+        <div class="nm">Settings</div>
+        <div class="desc">Money / Appearance / Data / About. Hybrid dynamic-color toggle lives here.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>
