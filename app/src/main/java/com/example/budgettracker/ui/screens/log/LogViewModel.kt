@@ -3,6 +3,7 @@ package com.example.budgettracker.ui.screens.log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.budgettracker.data.entity.Category
+import com.example.budgettracker.data.entity.CategoryGroup
 import com.example.budgettracker.data.entity.Kind
 import com.example.budgettracker.data.entity.TransactionEntity
 import com.example.budgettracker.data.repository.CategoryRepository
@@ -28,6 +29,7 @@ data class TxnRow(
     val id: Long,
     val categoryId: Long,
     val categoryName: String,
+    val groupName: String,
     val leadingColor: String,   // category.color ?: group.color
     val kind: Kind,
     val amount: Long,
@@ -35,7 +37,12 @@ data class TxnRow(
     val date: Long,
 )
 
-data class DateSection(val dateLabel: String, val dayNet: Long, val rows: List<TxnRow>)
+data class DateSection(
+    val dayLabel: String,   // "Jun 5"
+    val weekday: String,    // "THU" (uppercased in the UI)
+    val dayNet: Long,
+    val rows: List<TxnRow>,
+)
 
 data class LogUiState(
     val sections: List<DateSection>,
@@ -50,7 +57,8 @@ data class LogUiState(
     }
 }
 
-private val DATE_LABEL_FORMAT = DateTimeFormatter.ofPattern("MMM d · EEE", Locale.ENGLISH)
+private val DAY_FORMAT = DateTimeFormatter.ofPattern("MMM d", Locale.ENGLISH)
+private val WEEKDAY_FORMAT = DateTimeFormatter.ofPattern("EEE", Locale.ENGLISH)
 
 /**
  * Pure: build the Log UI state for a month's [transactions]. Net-band totals always reflect the full
@@ -60,7 +68,7 @@ private val DATE_LABEL_FORMAT = DateTimeFormatter.ofPattern("MMM d · EEE", Loca
 fun buildLogState(
     transactions: List<TransactionEntity>,
     categoriesById: Map<Long, Category>,
-    groupColorById: Map<Long, String>,
+    groupsById: Map<Long, CategoryGroup>,
     filter: TxnFilter,
     zone: ZoneId,
 ): LogUiState {
@@ -86,11 +94,13 @@ fun buildLogState(
             val rows = items
                 .sortedWith(compareByDescending<Resolved> { it.txn.date }.thenByDescending { it.txn.createdAt })
                 .map { r ->
+                    val group = groupsById[r.category.groupId]
                     TxnRow(
                         id = r.txn.id,
                         categoryId = r.category.id,
                         categoryName = r.category.name,
-                        leadingColor = r.category.color ?: groupColorById[r.category.groupId] ?: "#64748b",
+                        groupName = group?.name ?: "",
+                        leadingColor = r.category.color ?: group?.color ?: "#64748b",
                         kind = r.category.kind,
                         amount = r.txn.amount,
                         note = r.txn.description,
@@ -98,7 +108,7 @@ fun buildLogState(
                     )
                 }
             val dayNet = rows.sumOf { if (it.kind == Kind.INCOME) it.amount else -it.amount }
-            DateSection(date.format(DATE_LABEL_FORMAT), dayNet, rows)
+            DateSection(date.format(DAY_FORMAT), date.format(WEEKDAY_FORMAT), dayNet, rows)
         }
 
     return LogUiState(sections, income, expense, income - expense, incomeCount, expenseCount)
@@ -129,7 +139,7 @@ class LogViewModel(
         categoryRepository.observeGroups(includeArchived = true),
         _filter,
     ) { txns, cats, groups, filter ->
-        buildLogState(txns, cats.associateBy { it.id }, groups.associate { it.id to it.color }, filter, zoneId)
+        buildLogState(txns, cats.associateBy { it.id }, groups.associateBy { it.id }, filter, zoneId)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), LogUiState.EMPTY)
 
     fun setMonth(value: String) { month.value = value }

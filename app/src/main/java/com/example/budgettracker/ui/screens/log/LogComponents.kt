@@ -14,9 +14,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -25,6 +25,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.budgettracker.data.entity.Kind
 import com.example.budgettracker.domain.money.Money
+import com.example.budgettracker.ui.components.BudgetCard
 import com.example.budgettracker.ui.screens.categories.parseHexColor
 import com.example.budgettracker.ui.theme.BudgetTheme
 import com.example.budgettracker.ui.theme.money
@@ -55,17 +56,21 @@ fun LogFilterChips(
 
 @Composable
 fun DateCard(section: DateSection, currency: String, onRowClick: (TxnRow) -> Unit, modifier: Modifier = Modifier) {
-    Card(modifier.fillMaxWidth()) {
+    BudgetCard(modifier) {
         Column(Modifier.padding(vertical = 4.dp)) {
             Row(
-                Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
+                Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(section.dateLabel, style = MaterialTheme.typography.titleMedium)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(section.dayLabel, style = MaterialTheme.typography.titleMedium)
+                    Spacer(Modifier.width(8.dp))
+                    WeekdayPill(section.weekday)
+                }
                 Text(
-                    "Net ${Money.format(section.dayNet, currency)}",
-                    style = MaterialTheme.typography.labelMedium,
+                    Money.formatShort(section.dayNet, currency),
+                    style = MaterialTheme.typography.labelLarge,
                     color = if (section.dayNet >= 0) BudgetTheme.semanticColors.income else BudgetTheme.semanticColors.overage,
                 )
             }
@@ -75,7 +80,26 @@ fun DateCard(section: DateSection, currency: String, onRowClick: (TxnRow) -> Uni
 }
 
 @Composable
+private fun WeekdayPill(weekday: String) {
+    Surface(shape = RoundedCornerShape(6.dp), color = MaterialTheme.colorScheme.surfaceVariant) {
+        Text(
+            weekday.uppercase(),
+            Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
 private fun TxnRowItem(row: TxnRow, currency: String, onClick: () -> Unit) {
+    // Description leads as the title when present; otherwise the category name does (design §5.1).
+    val title = row.note?.takeIf { it.isNotBlank() } ?: row.categoryName
+    val subtitle = if (row.note?.isNotBlank() == true) {
+        if (row.groupName.isNotBlank()) "${row.groupName} · ${row.categoryName}" else row.categoryName
+    } else {
+        row.groupName.takeIf { it.isNotBlank() }
+    }
     Row(
         Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -83,8 +107,8 @@ private fun TxnRowItem(row: TxnRow, currency: String, onClick: () -> Unit) {
         Box(Modifier.width(3.dp).height(36.dp).background(parseHexColor(row.leadingColor), RoundedCornerShape(2.dp)))
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
-            Text(row.categoryName, style = MaterialTheme.typography.titleMedium)
-            row.note?.let {
+            Text(title, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            subtitle?.let {
                 Text(
                     it,
                     style = MaterialTheme.typography.bodyMedium,

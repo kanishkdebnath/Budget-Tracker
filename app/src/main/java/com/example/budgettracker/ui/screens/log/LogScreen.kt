@@ -76,7 +76,7 @@ fun LogScreen(
                 )
             } else {
                 LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    items(uiState.sections, key = { it.dateLabel }) { section ->
+                    items(uiState.sections, key = { it.dayLabel }) { section ->
                         DateCard(section, currency, onRowClick = { editingRow = it; showSheet = true })
                     }
                 }

@@ -1,6 +1,7 @@
 package com.example.budgettracker.ui.screens.log
 
 import com.example.budgettracker.data.entity.Category
+import com.example.budgettracker.data.entity.CategoryGroup
 import com.example.budgettracker.data.entity.Kind
 import com.example.budgettracker.data.entity.TransactionEntity
 import org.junit.Assert.assertEquals
@@ -19,7 +20,9 @@ class LogStateTest {
         TransactionEntity(id = id, date = Instant.parse(dateIso).toEpochMilli(), categoryId = categoryId, amount = amount, createdAt = created, updatedAt = 0)
 
     private val cats = mapOf(1L to cat(1, Kind.INCOME), 2L to cat(2, Kind.EXPENSE))
-    private val groupColors = mapOf(1L to "#10b981")
+    private val groups = mapOf(
+        1L to CategoryGroup(id = 1, name = "Essentials", color = "#10b981", order = 0, createdAt = 0, updatedAt = 0),
+    )
 
     @Test fun totalsAndNetReflectFullMonth() {
         val txns = listOf(
@@ -27,7 +30,7 @@ class LogStateTest {
             txn(2, 2, 200_000, "2026-06-02T10:00:00Z"),
             txn(3, 2, 100_000, "2026-06-02T11:00:00Z"),
         )
-        val state = buildLogState(txns, cats, groupColors, TxnFilter.ALL, utc)
+        val state = buildLogState(txns, cats, groups, TxnFilter.ALL, utc)
         assertEquals(500_000L, state.income)
         assertEquals(300_000L, state.expense)
         assertEquals(200_000L, state.net)
@@ -40,7 +43,7 @@ class LogStateTest {
             txn(1, 1, 500_000, "2026-06-01T10:00:00Z"),
             txn(2, 2, 200_000, "2026-06-02T10:00:00Z"),
         )
-        val state = buildLogState(txns, cats, groupColors, TxnFilter.ALL, utc)
+        val state = buildLogState(txns, cats, groups, TxnFilter.ALL, utc)
         assertEquals(2, state.sections.size)
         assertEquals(-200_000L, state.sections[0].dayNet) // June 2 first
         assertEquals(500_000L, state.sections[1].dayNet)
@@ -51,10 +54,21 @@ class LogStateTest {
             txn(1, 1, 500_000, "2026-06-01T10:00:00Z"),
             txn(2, 2, 200_000, "2026-06-02T10:00:00Z"),
         )
-        val state = buildLogState(txns, cats, groupColors, TxnFilter.INCOME, utc)
+        val state = buildLogState(txns, cats, groups, TxnFilter.INCOME, utc)
         assertEquals(500_000L, state.income)
         assertEquals(200_000L, state.expense)
         assertEquals(1, state.sections.size)
         assertEquals("C1", state.sections[0].rows.single().categoryName)
+    }
+
+    @Test fun rowsCarryGroupNameAndSectionsCarryDayLabelAndWeekday() {
+        val state = buildLogState(
+            listOf(txn(1, 2, 200_000, "2026-06-04T10:00:00Z")), // June 4, 2026 is a Thursday
+            cats, groups, TxnFilter.ALL, utc,
+        )
+        val section = state.sections.single()
+        assertEquals("Jun 4", section.dayLabel)
+        assertEquals("Thu", section.weekday)
+        assertEquals("Essentials", section.rows.single().groupName)
     }
 }
