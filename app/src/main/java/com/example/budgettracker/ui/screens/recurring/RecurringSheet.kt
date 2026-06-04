@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
+import com.example.budgettracker.ui.components.GradientButton
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -88,10 +88,11 @@ fun RecurringSheet(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (existing != null) TextButton(onClick = onDelete) { Text("Delete") }
                 Spacer(Modifier.weight(1f))
-                Button(
+                GradientButton(
+                    "Save",
                     onClick = { if (valid) onSave(label, categoryId!!, amount!!, day!!, active) },
                     enabled = valid,
-                ) { Text("Save") }
+                )
             }
             Spacer(Modifier.height(8.dp))
         }

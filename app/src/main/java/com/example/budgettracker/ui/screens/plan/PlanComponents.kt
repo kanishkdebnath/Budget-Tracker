@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
+import com.example.budgettracker.ui.components.GradientButton
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -78,8 +78,6 @@ fun PlanGroupCard(
 @Composable
 fun PlanSaveBar(onSave: () -> Unit, modifier: Modifier = Modifier) {
     Surface(modifier.fillMaxWidth(), tonalElevation = 3.dp, shadowElevation = 8.dp) {
-        Button(onClick = onSave, modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-            Text("Save targets")
-        }
+        GradientButton("Save targets", onClick = onSave, modifier = Modifier.fillMaxWidth().padding(16.dp))
     }
 }

@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,6 +30,8 @@ import com.example.budgettracker.export.ExportFormat
 import com.example.budgettracker.export.ExportManager
 import com.example.budgettracker.ui.AppViewModelProvider
 import com.example.budgettracker.ui.components.BudgetCard
+import com.example.budgettracker.ui.components.GradientButton
+import com.example.budgettracker.ui.components.GradientButtonTone
 import com.example.budgettracker.ui.components.NetBand
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -87,12 +88,14 @@ private fun ExportCard(enabled: Boolean, onExport: (ExportFormat) -> Unit) {
             Text("Export this month", style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilledTonalButton(onClick = { onExport(ExportFormat.EXCEL) }, enabled = enabled, modifier = Modifier.weight(1f)) {
-                    Text("Excel")
-                }
-                FilledTonalButton(onClick = { onExport(ExportFormat.PDF) }, enabled = enabled, modifier = Modifier.weight(1f)) {
-                    Text("PDF")
-                }
+                GradientButton(
+                    "Excel", onClick = { onExport(ExportFormat.EXCEL) }, enabled = enabled,
+                    tone = GradientButtonTone.TONAL, modifier = Modifier.weight(1f),
+                )
+                GradientButton(
+                    "PDF", onClick = { onExport(ExportFormat.PDF) }, enabled = enabled,
+                    tone = GradientButtonTone.TONAL, modifier = Modifier.weight(1f),
+                )
             }
             if (!enabled) {
                 Spacer(Modifier.height(6.dp))

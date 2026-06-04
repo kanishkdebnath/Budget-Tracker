@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Button
+import com.example.budgettracker.ui.components.GradientButton
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -47,7 +47,7 @@ fun NewChooserSheet(onDismiss: () -> Unit, onNewCategory: () -> Unit, onNewGroup
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(Modifier.padding(16.dp).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text("Add new", style = MaterialTheme.typography.titleLarge)
-            Button(onClick = onNewCategory, modifier = Modifier.fillMaxWidth()) { Text("New category") }
+            GradientButton("New category", onClick = onNewCategory, modifier = Modifier.fillMaxWidth())
             OutlinedButton(onClick = onNewGroup, modifier = Modifier.fillMaxWidth()) { Text("New group") }
             Spacer(Modifier.height(8.dp))
         }
@@ -73,7 +73,7 @@ fun GroupFormSheet(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (existing != null) TextButton(onClick = onArchive) { Text("Archive") }
                 Spacer(Modifier.weight(1f))
-                Button(onClick = { onSave(name, color) }, enabled = name.isNotBlank()) { Text("Save") }
+                GradientButton("Save", onClick = { onSave(name, color) }, enabled = name.isNotBlank())
             }
             Spacer(Modifier.height(8.dp))
         }
@@ -114,10 +114,11 @@ fun CategoryFormSheet(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (existing != null) TextButton(onClick = onArchive) { Text("Archive") }
                 Spacer(Modifier.weight(1f))
-                Button(
+                GradientButton(
+                    "Save",
                     onClick = { groupId?.let { onSave(it, name, kind, color) } },
                     enabled = name.isNotBlank() && groupId != null,
-                ) { Text("Save") }
+                )
             }
             Spacer(Modifier.height(8.dp))
         }

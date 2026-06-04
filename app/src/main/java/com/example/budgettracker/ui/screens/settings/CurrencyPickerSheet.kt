@@ -13,7 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.Button
+import com.example.budgettracker.ui.components.GradientButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -74,7 +74,7 @@ fun CurrencyPickerSheet(current: String, onDismiss: () -> Unit, onSelect: (Strin
                     modifier = Modifier.weight(1f),
                 )
                 Spacer(Modifier.width(8.dp))
-                Button(enabled = isValidCurrencyCode(customCode), onClick = { onSelect(customCode) }) { Text("Use") }
+                GradientButton("Use", onClick = { onSelect(customCode) }, enabled = isValidCurrencyCode(customCode))
             }
             Spacer(Modifier.height(16.dp))
         }
