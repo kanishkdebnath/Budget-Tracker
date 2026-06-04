@@ -57,6 +57,7 @@ fun BudgetApp() {
         mutableStateOf(MonthUtils.monthOf(System.currentTimeMillis(), ZoneId.systemDefault()))
     }
     var categoriesSearchActive by rememberSaveable { mutableStateOf(false) }
+    var reportExportOpen by rememberSaveable { mutableStateOf(false) }
     val goToSettings = { navController.navigate(SETTINGS_ROUTE) { launchSingleTop = true } }
 
     BudgetBackground {
@@ -71,6 +72,7 @@ fun BudgetApp() {
                         onPreviousMonth = { month = YearMonth.parse(month).minusMonths(1).toString() },
                         onNextMonth = { month = YearMonth.parse(month).plusMonths(1).toString() },
                         onSettings = goToSettings,
+                        onExport = if (currentDest == TopLevelDest.REPORT) ({ reportExportOpen = true }) else null,
                     )
                     currentDest == TopLevelDest.CATEGORIES -> SectionTopBar(
                     "Categories", goToSettings,
@@ -91,7 +93,13 @@ fun BudgetApp() {
             ) {
                 composable(TopLevelDest.LOG.route) { LogScreen(month = month, onMonthChange = { month = it }) }
                 composable(TopLevelDest.PLAN.route) { PlanScreen(month) }
-                composable(TopLevelDest.REPORT.route) { ReportScreen(month) }
+                composable(TopLevelDest.REPORT.route) {
+                    ReportScreen(
+                        month,
+                        exportSheetOpen = reportExportOpen,
+                        onExportSheetClose = { reportExportOpen = false },
+                    )
+                }
                 composable(TopLevelDest.CATEGORIES.route) {
                 CategoriesScreen(
                     searchActive = categoriesSearchActive,

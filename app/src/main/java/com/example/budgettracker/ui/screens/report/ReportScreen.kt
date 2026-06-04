@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -41,6 +43,8 @@ import kotlinx.coroutines.withContext
 fun ReportScreen(
     month: String,
     modifier: Modifier = Modifier,
+    exportSheetOpen: Boolean = false,
+    onExportSheetClose: () -> Unit = {},
     viewModel: ReportViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     LaunchedEffect(month) { viewModel.setMonth(month) }
@@ -48,6 +52,20 @@ fun ReportScreen(
     val exportBundle by viewModel.exportBundle.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+
+    // Build the file off the main thread, then hand it to the Android share sheet (§F6). Shared by
+    // the inline export card and the top-bar export sheet.
+    val onExport: (ExportFormat) -> Unit = { format ->
+        val bundle = exportBundle
+        if (bundle != null) {
+            scope.launch {
+                val uri = withContext(Dispatchers.IO) {
+                    ExportManager.export(context, bundle, format, now = System.currentTimeMillis())
+                }
+                context.startActivity(Intent.createChooser(ExportManager.shareIntent(uri, format), "Share"))
+            }
+        }
+    }
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -67,16 +85,47 @@ fun ReportScreen(
         items(state.data.groups, key = { it.group.id }) { group ->
             ReportGroupCard(group, state.currency)
         }
-        item {
-            ExportCard(enabled = exportBundle != null) { format ->
-                val bundle = exportBundle ?: return@ExportCard
-                scope.launch {
-                    val uri = withContext(Dispatchers.IO) {
-                        ExportManager.export(context, bundle, format, now = System.currentTimeMillis())
-                    }
-                    context.startActivity(Intent.createChooser(ExportManager.shareIntent(uri, format), "Share"))
-                }
+        item { ExportCard(enabled = exportBundle != null, onExport = onExport) }
+    }
+
+    if (exportSheetOpen) {
+        ExportSheet(
+            monthLabel = MonthUtils.monthLabel(month),
+            enabled = exportBundle != null,
+            onExport = { format -> onExport(format); onExportSheetClose() },
+            onDismiss = onExportSheetClose,
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ExportSheet(
+    monthLabel: String,
+    enabled: Boolean,
+    onExport: (ExportFormat) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        Column(Modifier.padding(16.dp).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("Export $monthLabel", style = MaterialTheme.typography.titleLarge)
+            Text(
+                "Share this month's transactions (Excel) or the target-vs-actual summary (PDF).",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(8.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                GradientButton(
+                    "Excel", onClick = { onExport(ExportFormat.EXCEL) }, enabled = enabled,
+                    tone = GradientButtonTone.TONAL, modifier = Modifier.weight(1f),
+                )
+                GradientButton(
+                    "PDF", onClick = { onExport(ExportFormat.PDF) }, enabled = enabled,
+                    tone = GradientButtonTone.TONAL, modifier = Modifier.weight(1f),
+                )
             }
+            Spacer(Modifier.height(8.dp))
         }
     }
 }

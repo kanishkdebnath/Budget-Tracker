@@ -7,6 +7,7 @@ import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.FileUpload
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -36,6 +37,7 @@ fun MonthNavTopBar(
     onPreviousMonth: () -> Unit,
     onNextMonth: () -> Unit,
     onSettings: () -> Unit,
+    onExport: (() -> Unit)? = null,
 ) {
     TopAppBar(
         title = {
@@ -50,6 +52,9 @@ fun MonthNavTopBar(
             }
         },
         actions = {
+            if (onExport != null) {
+                IconButton(onClick = onExport) { Icon(Icons.Outlined.FileUpload, contentDescription = "Export") }
+            }
             IconButton(onClick = onSettings) { Icon(Icons.Filled.Settings, contentDescription = "Settings") }
         },
         colors = transparentBarColors(),
