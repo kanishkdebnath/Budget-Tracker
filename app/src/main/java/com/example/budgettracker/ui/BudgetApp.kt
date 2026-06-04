@@ -120,7 +120,8 @@ private fun MainPager(onOpenSettings: () -> Unit) {
             BottomNav(
                 selectedIndex = pagerState.currentPage,
                 settledIndex = pagerState.settledPage,
-                onTabClick = { i -> scope.launch { pagerState.animateScrollToPage(i) } },
+                // Tap jumps straight to the tab (no flashing through the in-between pages).
+                onTabClick = { i -> scope.launch { pagerState.scrollToPage(i) } },
             )
         },
     ) { innerPadding ->
@@ -198,12 +199,16 @@ private fun BottomNav(selectedIndex: Int, settledIndex: Int, onTabClick: (Int) -
     }
 }
 
-/** One-shot springy wiggle (rotation, deg) that replays each time [trigger] becomes true. */
+/**
+ * One-shot springy wiggle (rotation, deg) that replays each time [trigger] becomes true — but not on
+ * the initial composition, so the starting tab doesn't shake on app launch.
+ */
 @Composable
 private fun rememberNavShake(trigger: Boolean): Float {
     val rotation = remember { Animatable(0f) }
+    var firstRun by remember { mutableStateOf(true) }
     LaunchedEffect(trigger) {
-        if (trigger) {
+        if (trigger && !firstRun) {
             rotation.snapTo(0f)
             rotation.animateTo(
                 targetValue = 0f,
@@ -217,6 +222,7 @@ private fun rememberNavShake(trigger: Boolean): Float {
                 },
             )
         }
+        firstRun = false
     }
     return rotation.value
 }
