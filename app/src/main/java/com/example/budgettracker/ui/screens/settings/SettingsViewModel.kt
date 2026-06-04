@@ -3,6 +3,7 @@ package com.example.budgettracker.ui.screens.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.budgettracker.data.repository.PreferencesRepository
+import com.example.budgettracker.ui.theme.DensityMode
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -54,7 +55,12 @@ class SettingsViewModel(private val preferences: PreferencesRepository) : ViewMo
     val dynamicColor: StateFlow<Boolean> = preferences.dynamicColor
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
 
+    val densityMode: StateFlow<DensityMode> = preferences.density
+        .map { DensityMode.fromStorage(it) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DensityMode.COMFORTABLE)
+
     fun setCurrency(code: String) = viewModelScope.launch { preferences.setCurrency(code.uppercase()) }
     fun setThemeMode(mode: ThemeMode) = viewModelScope.launch { preferences.setThemeMode(mode.storageValue) }
     fun setDynamicColor(enabled: Boolean) = viewModelScope.launch { preferences.setDynamicColor(enabled) }
+    fun setDensity(mode: DensityMode) = viewModelScope.launch { preferences.setDensity(mode.storageValue) }
 }
