@@ -1,5 +1,11 @@
 package com.example.budgettracker.ui.components
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -72,7 +78,16 @@ private fun NetCell(label: String, value: Long, valueColor: Color, currency: Str
     Column(modifier) {
         Text(label.uppercase(), style = MaterialTheme.typography.labelMedium, color = NetLabel)
         Spacer(Modifier.height(3.dp))
-        Text(Money.formatShort(value, currency), style = MaterialTheme.typography.titleLarge, color = valueColor, maxLines = 1)
+        // Calm number roll: the value slides up + fades when it changes (design "calm data").
+        AnimatedContent(
+            targetState = Money.formatShort(value, currency),
+            transitionSpec = {
+                (slideInVertically { it / 2 } + fadeIn()) togetherWith (slideOutVertically { -it / 2 } + fadeOut())
+            },
+            label = "netValue",
+        ) { text ->
+            Text(text, style = MaterialTheme.typography.titleLarge, color = valueColor, maxLines = 1)
+        }
         if (planned != null) {
             Spacer(Modifier.height(3.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
