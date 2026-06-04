@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import com.example.budgettracker.data.entity.Kind
 import com.example.budgettracker.domain.money.Money
 import com.example.budgettracker.ui.components.BudgetCard
+import com.example.budgettracker.ui.components.chipPop
 import com.example.budgettracker.ui.screens.categories.parseHexColor
 import com.example.budgettracker.ui.theme.BudgetTheme
 import com.example.budgettracker.ui.theme.money
@@ -50,7 +51,12 @@ fun LogFilterChips(
                 TxnFilter.INCOME -> "Income · $incomeCount"
                 TxnFilter.EXPENSE -> "Expense · $expenseCount"
             }
-            FilterChip(selected = filter == selected, onClick = { onSelect(filter) }, label = { Text(label) })
+            FilterChip(
+                selected = filter == selected,
+                onClick = { onSelect(filter) },
+                label = { Text(label) },
+                modifier = Modifier.chipPop(filter == selected),
+            )
         }
     }
 }
