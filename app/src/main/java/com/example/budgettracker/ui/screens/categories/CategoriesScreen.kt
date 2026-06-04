@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.Category
@@ -36,6 +36,7 @@ import com.example.budgettracker.data.entity.CategoryGroup
 import com.example.budgettracker.ui.AppViewModelProvider
 import com.example.budgettracker.ui.components.EmptyState
 import com.example.budgettracker.ui.components.GradientFab
+import com.example.budgettracker.ui.components.cardEntrance
 
 private sealed interface CategoriesSheet {
     data object Chooser : CategoriesSheet
@@ -110,11 +111,12 @@ fun CategoriesScreen(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    items(sections, key = { it.group.id }) { section ->
+                    itemsIndexed(sections, key = { _, it -> it.group.id }) { index, section ->
                         GroupCard(
                             section = section,
                             onGroupClick = { sheet = CategoriesSheet.GroupForm(section.group) },
                             onCategoryClick = { category -> sheet = CategoriesSheet.CategoryForm(category, category.groupId) },
+                            modifier = Modifier.cardEntrance(index, filter),
                         )
                     }
                 }
