@@ -48,6 +48,8 @@ class RecurringRepository(
             transactionDao.insert(
                 TransactionEntity(
                     date = date, categoryId = template.categoryId, amount = template.amount,
+                    // Carry the template's label onto the entry so the Log shows it as the title (§F1.1).
+                    description = template.label.ifBlank { null },
                     recurringTemplateId = template.id, createdAt = t, updatedAt = t,
                 ),
             )
