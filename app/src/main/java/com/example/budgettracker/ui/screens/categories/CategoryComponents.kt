@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -176,8 +177,11 @@ fun GroupCard(
 
 @Composable
 private fun CategoryRow(category: Category, groupColor: Color, onClick: () -> Unit) {
+    val density = BudgetTheme.density
     Row(
-        Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 10.dp),
+        Modifier.fillMaxWidth().clickable(onClick = onClick)
+            .heightIn(min = density.rowMinHeight)
+            .padding(horizontal = 16.dp, vertical = density.rowPaddingVertical),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         ColorDot(category.color?.let { parseHexColor(it) } ?: groupColor, size = 10.dp)

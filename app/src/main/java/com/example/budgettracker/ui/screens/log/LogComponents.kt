@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -100,8 +101,11 @@ private fun TxnRowItem(row: TxnRow, currency: String, onClick: () -> Unit) {
     } else {
         row.groupName.takeIf { it.isNotBlank() }
     }
+    val density = BudgetTheme.density
     Row(
-        Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 10.dp),
+        Modifier.fillMaxWidth().clickable(onClick = onClick)
+            .heightIn(min = density.rowMinHeight)
+            .padding(horizontal = 16.dp, vertical = density.rowPaddingVertical),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(Modifier.width(3.dp).height(36.dp).background(parseHexColor(row.leadingColor), RoundedCornerShape(2.dp)))

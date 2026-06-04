@@ -14,6 +14,8 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 
 private val LightColors = lightColorScheme(
     primary = LightPrimary, onPrimary = LightOnPrimary,
@@ -69,11 +71,15 @@ val LocalBudgetSemanticColors = staticCompositionLocalOf<BudgetSemanticColors> {
     error("BudgetSemanticColors not provided; wrap content in BudgetTrackerTheme")
 }
 
-/** Ergonomic accessor: BudgetTheme.semanticColors.income, etc. */
+/** Ergonomic accessor: BudgetTheme.semanticColors.income, BudgetTheme.density.rowMinHeight, etc. */
 object BudgetTheme {
     val semanticColors: BudgetSemanticColors
         @Composable @ReadOnlyComposable
         get() = LocalBudgetSemanticColors.current
+
+    val density: DensityMode
+        @Composable @ReadOnlyComposable
+        get() = LocalDensityMode.current
 }
 
 @Composable
@@ -81,6 +87,7 @@ fun BudgetTrackerTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Fixed navy brand palette is the default; dynamic color is opt-in via Settings (design §2, §7.3).
     dynamicColor: Boolean = false,
+    densityMode: DensityMode = DensityMode.COMFORTABLE,
     content: @Composable () -> Unit,
 ) {
     val colorScheme = when {
@@ -99,7 +106,17 @@ fun BudgetTrackerTheme(
         expense = colorScheme.onSurface,
     )
 
-    CompositionLocalProvider(LocalBudgetSemanticColors provides semanticColors) {
+    // Compact tightens all text via the font scale (dp dimensions are untouched, §7.2).
+    val base = LocalDensity.current
+    val scaledDensity =
+        if (densityMode.bodyScale == 1f) base
+        else Density(base.density, base.fontScale * densityMode.bodyScale)
+
+    CompositionLocalProvider(
+        LocalBudgetSemanticColors provides semanticColors,
+        LocalDensityMode provides densityMode,
+        LocalDensity provides scaledDensity,
+    ) {
         MaterialTheme(
             colorScheme = colorScheme,
             typography = AppTypography,

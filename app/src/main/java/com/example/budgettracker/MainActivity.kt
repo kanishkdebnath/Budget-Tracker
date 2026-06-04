@@ -10,6 +10,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.budgettracker.ui.BudgetApp
 import com.example.budgettracker.ui.screens.settings.ThemeMode
 import com.example.budgettracker.ui.theme.BudgetTrackerTheme
+import com.example.budgettracker.ui.theme.DensityMode
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,8 +20,13 @@ class MainActivity : ComponentActivity() {
         setContent {
             val themeModeValue by preferences.themeMode.collectAsStateWithLifecycle(initialValue = "dark")
             val dynamicColor by preferences.dynamicColor.collectAsStateWithLifecycle(initialValue = false)
+            val densityValue by preferences.density.collectAsStateWithLifecycle(initialValue = "comfortable")
             val darkTheme = ThemeMode.fromStorage(themeModeValue).resolveDark(isSystemInDarkTheme())
-            BudgetTrackerTheme(darkTheme = darkTheme, dynamicColor = dynamicColor) {
+            BudgetTrackerTheme(
+                darkTheme = darkTheme,
+                dynamicColor = dynamicColor,
+                densityMode = DensityMode.fromStorage(densityValue),
+            ) {
                 BudgetApp()
             }
         }

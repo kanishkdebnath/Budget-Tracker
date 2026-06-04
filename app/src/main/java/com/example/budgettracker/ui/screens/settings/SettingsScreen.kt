@@ -31,6 +31,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.budgettracker.domain.money.Money
 import com.example.budgettracker.ui.AppViewModelProvider
+import com.example.budgettracker.ui.theme.DensityMode
 
 @Composable
 fun SettingsScreen(
@@ -40,8 +41,10 @@ fun SettingsScreen(
     val currency by viewModel.currency.collectAsStateWithLifecycle()
     val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
     val dynamicColor by viewModel.dynamicColor.collectAsStateWithLifecycle()
+    val densityMode by viewModel.densityMode.collectAsStateWithLifecycle()
     var showCurrency by remember { mutableStateOf(false) }
     var showTheme by remember { mutableStateOf(false) }
+    var showDensity by remember { mutableStateOf(false) }
 
     Column(
         modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
@@ -52,6 +55,7 @@ fun SettingsScreen(
         }
         SettingsSection("Appearance") {
             SettingTile("Theme", themeMode.label, onClick = { showTheme = true })
+            SettingTile("Density", densityMode.label, onClick = { showDensity = true })
             SwitchTile("Dynamic color", "Use the system palette (Android 12+)", dynamicColor) { viewModel.setDynamicColor(it) }
         }
         SettingsSection("About") {
@@ -72,6 +76,13 @@ fun SettingsScreen(
             current = themeMode,
             onDismiss = { showTheme = false },
             onSelect = { viewModel.setThemeMode(it); showTheme = false },
+        )
+    }
+    if (showDensity) {
+        DensityDialog(
+            current = densityMode,
+            onDismiss = { showDensity = false },
+            onSelect = { viewModel.setDensity(it); showDensity = false },
         )
     }
 }
@@ -122,6 +133,29 @@ private fun ThemeDialog(current: ThemeMode, onDismiss: () -> Unit, onSelect: (Th
         text = {
             Column {
                 ThemeMode.entries.forEach { mode ->
+                    Row(
+                        Modifier.fillMaxWidth().clickable { onSelect(mode) }.padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        RadioButton(selected = mode == current, onClick = { onSelect(mode) })
+                        Spacer(Modifier.width(8.dp))
+                        Text(mode.label, style = MaterialTheme.typography.bodyLarge)
+                    }
+                }
+            }
+        },
+    )
+}
+
+@Composable
+private fun DensityDialog(current: DensityMode, onDismiss: () -> Unit, onSelect: (DensityMode) -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = { TextButton(onClick = onDismiss) { Text("Done") } },
+        title = { Text("Density") },
+        text = {
+            Column {
+                DensityMode.entries.forEach { mode ->
                     Row(
                         Modifier.fillMaxWidth().clickable { onSelect(mode) }.padding(vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
