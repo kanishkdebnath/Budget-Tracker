@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.MaterialTheme
 import com.example.budgettracker.data.entity.Kind
 import com.example.budgettracker.domain.money.Money
@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.budgettracker.ui.AppViewModelProvider
+import com.example.budgettracker.ui.components.cardEntrance
 import com.example.budgettracker.ui.components.NetBand
 import kotlinx.coroutines.launch
 
@@ -78,14 +79,14 @@ fun PlanScreen(
                 ) {
                     if (incomeGroups.isNotEmpty()) {
                         item("income-label") { PlanSectionLabel("Income") }
-                        items(incomeGroups, key = { it.group.id }) { group ->
-                            PlanGroupCard(group, inputs, currency, viewModel::onInputChange)
+                        itemsIndexed(incomeGroups, key = { _, it -> it.group.id }) { index, group ->
+                            PlanGroupCard(group, inputs, currency, viewModel::onInputChange, Modifier.cardEntrance(index, month))
                         }
                     }
                     if (expenseGroups.isNotEmpty()) {
                         item("expense-label") { PlanSectionLabel("Expense groups") }
-                        items(expenseGroups, key = { it.group.id }) { group ->
-                            PlanGroupCard(group, inputs, currency, viewModel::onInputChange)
+                        itemsIndexed(expenseGroups, key = { _, it -> it.group.id }) { index, group ->
+                            PlanGroupCard(group, inputs, currency, viewModel::onInputChange, Modifier.cardEntrance(index, month))
                         }
                     }
                 }

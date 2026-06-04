@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -32,6 +32,7 @@ import com.example.budgettracker.export.ExportFormat
 import com.example.budgettracker.export.ExportManager
 import com.example.budgettracker.ui.AppViewModelProvider
 import com.example.budgettracker.ui.components.BudgetCard
+import com.example.budgettracker.ui.components.cardEntrance
 import com.example.budgettracker.ui.components.GradientButton
 import com.example.budgettracker.ui.components.GradientButtonTone
 import com.example.budgettracker.ui.components.NetBand
@@ -82,8 +83,8 @@ fun ReportScreen(
         if (state.recurringDueCount > 0) {
             item { RecurringDueBanner(state.recurringDueCount) }
         }
-        items(state.data.groups, key = { it.group.id }) { group ->
-            ReportGroupCard(group, state.currency)
+        itemsIndexed(state.data.groups, key = { _, it -> it.group.id }) { index, group ->
+            ReportGroupCard(group, state.currency, Modifier.cardEntrance(index, month))
         }
         item { ExportCard(enabled = exportBundle != null, onExport = onExport) }
     }

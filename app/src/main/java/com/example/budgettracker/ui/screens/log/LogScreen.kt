@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
 import androidx.compose.material.icons.filled.Add
@@ -36,6 +36,7 @@ import com.example.budgettracker.domain.time.MonthUtils
 import com.example.budgettracker.ui.AppViewModelProvider
 import com.example.budgettracker.ui.components.EmptyState
 import com.example.budgettracker.ui.components.GradientFab
+import com.example.budgettracker.ui.components.cardEntrance
 import com.example.budgettracker.ui.components.NetBand
 import kotlinx.coroutines.launch
 import java.time.ZoneId
@@ -85,8 +86,12 @@ fun LogScreen(
                 )
             } else {
                 LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    items(uiState.sections, key = { it.dayLabel }) { section ->
-                        DateCard(section, currency, onRowClick = { editingRow = it; showSheet = true })
+                    itemsIndexed(uiState.sections, key = { _, it -> it.dayLabel }) { index, section ->
+                        DateCard(
+                            section, currency,
+                            onRowClick = { editingRow = it; showSheet = true },
+                            modifier = Modifier.cardEntrance(index, month),
+                        )
                     }
                 }
             }
