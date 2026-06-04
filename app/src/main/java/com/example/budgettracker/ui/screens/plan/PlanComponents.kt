@@ -1,5 +1,7 @@
 package com.example.budgettracker.ui.screens.plan
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -7,17 +9,20 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.TrackChanges
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -30,6 +35,7 @@ import com.example.budgettracker.ui.components.GradientButton
 import com.example.budgettracker.ui.screens.categories.ColorDot
 import com.example.budgettracker.ui.screens.categories.KindChip
 import com.example.budgettracker.ui.screens.categories.parseHexColor
+import com.example.budgettracker.ui.theme.BudgetGradients
 
 @Composable
 fun PlanBanner(banner: PrefillBanner, modifier: Modifier = Modifier) {
@@ -115,20 +121,28 @@ fun PlanGroupCard(
     }
 }
 
+private val StickyShape = RoundedCornerShape(16.dp)
+private val StickyLabel = Color(0xFF9FB1BD) // fixed light: the bar is navy in both themes
+
+/** Floating Save bar — a rounded navy card that lifts off the content scrolling beneath it. */
 @Composable
 fun PlanSaveBar(targetCount: Int, onSave: () -> Unit, modifier: Modifier = Modifier) {
-    Surface(modifier.fillMaxWidth(), tonalElevation = 3.dp, shadowElevation = 8.dp) {
-        Row(
-            Modifier.fillMaxWidth().padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                "$targetCount ${if (targetCount == 1) "target" else "targets"}",
-                modifier = Modifier.weight(1f),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            GradientButton("Save targets", onClick = onSave)
-        }
+    Row(
+        modifier
+            .fillMaxWidth()
+            .shadow(16.dp, StickyShape, clip = false)
+            .clip(StickyShape)
+            .background(BudgetGradients.StickyBar)
+            .border(1.dp, Color.White.copy(alpha = 0.07f), StickyShape)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            "$targetCount ${if (targetCount == 1) "target" else "targets"}",
+            modifier = Modifier.weight(1f),
+            style = MaterialTheme.typography.bodyMedium,
+            color = StickyLabel,
+        )
+        GradientButton("Save targets", onClick = onSave)
     }
 }

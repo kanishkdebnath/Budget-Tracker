@@ -38,6 +38,9 @@ object BudgetGradients {
     /** Bottom navigation bar — 180°, slightly darker than cards. */
     val BottomNav = Brush.verticalGradient(listOf(Color(0xFF131A20), Color(0xFF0E1419)))
 
+    /** Floating sticky bar (e.g. Plan Save) — 180°, lifts off the surface below it. */
+    val StickyBar = Brush.verticalGradient(listOf(Color(0xFF1A2229), Color(0xFF131A20)))
+
     /**
      * Brand-tinted top vignette behind every screen (design "phone-inner" radial glow):
      * a faint light from above the top edge. Colors only; build the sized [Brush] at draw time.
