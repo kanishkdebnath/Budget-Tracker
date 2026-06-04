@@ -54,6 +54,7 @@ class RecurringRepositoryTest {
         assertEquals(1, txns.size)
         assertEquals(id, txns[0].recurringTemplateId)
         assertEquals(500_000L, txns[0].amount)
+        assertEquals("Salary", txns[0].description) // label carries onto the entry (shown in the Log)
         assertEquals("2026-06", db.recurringTemplateDao().getById(id)?.lastRunMonth)
     }
 
