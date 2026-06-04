@@ -15,7 +15,6 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -28,6 +27,8 @@ import androidx.compose.ui.unit.dp
 import com.example.budgettracker.domain.money.Money
 import com.example.budgettracker.ui.components.BannerTone
 import com.example.budgettracker.ui.components.GradientBanner
+import com.example.budgettracker.ui.components.GradientButton
+import com.example.budgettracker.ui.components.GradientButtonTone
 import com.example.budgettracker.ui.theme.BudgetTheme
 
 @Composable
@@ -84,7 +85,7 @@ fun RecurringCard(
             Spacer(Modifier.width(12.dp))
             when (row.state) {
                 RecurringState.APPLIED -> AppliedPill()
-                RecurringState.ACTIONABLE -> FilledTonalButton(onClick = onApply) { Text("Apply") }
+                RecurringState.ACTIONABLE -> GradientButton("Apply", onClick = onApply, tone = GradientButtonTone.TONAL)
                 RecurringState.INACTIVE -> StatePill("Inactive", MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }

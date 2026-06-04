@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Calculate
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.DatePicker
@@ -39,6 +38,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.budgettracker.data.entity.Category
 import com.example.budgettracker.domain.money.Money
+import com.example.budgettracker.ui.components.GradientButton
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -95,10 +95,11 @@ fun TransactionSheet(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (existing != null) TextButton(onClick = onDelete) { Text("Delete") }
                 Spacer(Modifier.weight(1f))
-                Button(
+                GradientButton(
+                    "Save",
                     onClick = { categoryId?.let { id -> parsedAmount?.let { amt -> onSave(dateMillis, id, amt, note.ifBlank { null }) } } },
                     enabled = parsedAmount != null && categoryId != null,
-                ) { Text("Save") }
+                )
             }
             Spacer(Modifier.height(8.dp))
         }
