@@ -11,6 +11,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
+import com.example.budgettracker.data.entity.Kind
+import com.example.budgettracker.domain.money.Money
+import com.example.budgettracker.domain.report.inferGroupKind
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -54,10 +57,13 @@ fun PlanScreen(
         contentWindowInsets = WindowInsets(0),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
-            PlanSaveBar(onSave = {
-                viewModel.save()
-                scope.launch { snackbarHostState.showSnackbar("Targets saved") }
-            })
+            PlanSaveBar(
+                targetCount = inputs.count { Money.parseTargetToMinor(it.value) != null },
+                onSave = {
+                    viewModel.save()
+                    scope.launch { snackbarHostState.showSnackbar("Targets saved") }
+                },
+            )
         },
     ) { padding ->
         Column(Modifier.padding(padding).fillMaxSize()) {
@@ -68,13 +74,24 @@ fun PlanScreen(
             }
             NetBand(totals.income, totals.expense, totals.net, currency, Modifier.padding(horizontal = 16.dp))
             Spacer(Modifier.height(12.dp))
+            val incomeGroups = sections.filter { inferGroupKind(it.categories) == Kind.INCOME }
+            val expenseGroups = sections.filter { inferGroupKind(it.categories) == Kind.EXPENSE }
             LazyColumn(
                 modifier = Modifier.weight(1f),
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                items(sections, key = { it.group.id }) { group ->
-                    PlanGroupCard(group, inputs, currency, viewModel::onInputChange)
+                if (incomeGroups.isNotEmpty()) {
+                    item("income-label") { PlanSectionLabel("Income") }
+                    items(incomeGroups, key = { it.group.id }) { group ->
+                        PlanGroupCard(group, inputs, currency, viewModel::onInputChange)
+                    }
+                }
+                if (expenseGroups.isNotEmpty()) {
+                    item("expense-label") { PlanSectionLabel("Expense groups") }
+                    items(expenseGroups, key = { it.group.id }) { group ->
+                        PlanGroupCard(group, inputs, currency, viewModel::onInputChange)
+                    }
                 }
             }
         }
