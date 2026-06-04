@@ -39,6 +39,7 @@ import com.example.budgettracker.data.entity.Category
 import com.example.budgettracker.data.entity.Kind
 import com.example.budgettracker.domain.report.inferGroupKind
 import com.example.budgettracker.ui.components.BudgetCard
+import com.example.budgettracker.ui.components.chipPop
 import com.example.budgettracker.ui.theme.BudgetTheme
 
 /** Seed group colors as hex (design §3.1 / PRODUCT_SPEC §6.7) — used by the color pickers. */
@@ -79,7 +80,12 @@ fun CategoryFilterChips(selected: CategoryFilter, onSelect: (CategoryFilter) -> 
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         CategoryFilter.entries.forEach { filter ->
-            FilterChip(selected = filter == selected, onClick = { onSelect(filter) }, label = { Text(filter.label) })
+            FilterChip(
+                selected = filter == selected,
+                onClick = { onSelect(filter) },
+                label = { Text(filter.label) },
+                modifier = Modifier.chipPop(filter == selected),
+            )
         }
     }
 }
