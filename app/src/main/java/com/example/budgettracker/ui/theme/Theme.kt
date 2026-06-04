@@ -1,11 +1,8 @@
 package com.example.budgettracker.ui.theme
 
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -13,7 +10,6 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 
@@ -85,19 +81,12 @@ object BudgetTheme {
 @Composable
 fun BudgetTrackerTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Fixed navy brand palette is the default; dynamic color is opt-in via Settings (design §2, §7.3).
-    dynamicColor: Boolean = false,
     densityMode: DensityMode = DensityMode.COMFORTABLE,
     content: @Composable () -> Unit,
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-        darkTheme -> DarkColors
-        else -> LightColors
-    }
+    // Fixed navy brand only — Material You is intentionally not supported (the gradient chrome can't
+    // follow a dynamic palette, so it would only repaint half the UI; design §2/§7.3 decision reversed).
+    val colorScheme = if (darkTheme) DarkColors else LightColors
 
     // income/overage are fixed signal; expense follows the live onSurface ("uses text color", §3.1).
     val semanticColors = BudgetSemanticColors(
