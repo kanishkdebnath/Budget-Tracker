@@ -18,14 +18,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.example.budgettracker.ui.theme.BudgetGradients
+import com.example.budgettracker.ui.theme.BudgetTheme
 import com.example.budgettracker.ui.theme.PillShape
 
 enum class GradientButtonTone { FILLED, TONAL }
 
-// Fixed inks: the gradients are theme-independent (light-blue / navy), so the text/icon color is too,
-// staying legible in both light and dark (design §3.6 buttons — filled = on-primary, tonal = on-primary-container).
+// Dark-theme inks (filled = on the light-blue gradient, tonal = on the navy gradient).
 private val FilledInk = Color(0xFF003547)
 private val TonalInk = Color(0xFFC5E5F9)
+// Light theme: FILLED is solid navy → white ink; TONAL is a light tint → navy ink.
+private val TonalInkLight = Color(0xFF0D2736)
 
 /**
  * Pill button with the brand gradient (design `.btn`). FILLED is the light-blue primary CTA; TONAL is
@@ -42,11 +44,16 @@ fun GradientButton(
     icon: ImageVector? = null,
 ) {
     val scheme = MaterialTheme.colorScheme
-    val brush = if (tone == GradientButtonTone.FILLED) BudgetGradients.FilledButton else BudgetGradients.TonalButton
-    val contentColor = if (enabled) {
-        if (tone == GradientButtonTone.FILLED) FilledInk else TonalInk
-    } else {
+    val light = BudgetTheme.isLight
+    val brush = when {
+        tone == GradientButtonTone.FILLED -> if (light) BudgetGradients.FilledButtonLight else BudgetGradients.FilledButton
+        else -> if (light) BudgetGradients.TonalButtonLight else BudgetGradients.TonalButton
+    }
+    val contentColor = if (!enabled) {
         scheme.onSurfaceVariant
+    } else when {
+        tone == GradientButtonTone.FILLED -> if (light) Color.White else FilledInk
+        else -> if (light) TonalInkLight else TonalInk
     }
     val background = if (enabled) Modifier.background(brush) else Modifier.background(scheme.surfaceVariant)
     Row(

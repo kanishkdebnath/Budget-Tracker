@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.example.budgettracker.ui.theme.BudgetGradients
+import com.example.budgettracker.ui.theme.BudgetTheme
 
 enum class BannerTone { INFO, AMBER }
 
@@ -34,8 +35,15 @@ fun GradientBanner(
     leadingIcon: ImageVector? = null,
     trailing: @Composable (() -> Unit)? = null,
 ) {
-    val brush = if (tone == BannerTone.INFO) BudgetGradients.BannerInfo else BudgetGradients.BannerAmber
-    val content = if (tone == BannerTone.INFO) Color(0xFFCDE3F2) else Color(0xFFFBE3CC)
+    val light = BudgetTheme.isLight
+    val brush = when (tone) {
+        BannerTone.INFO -> if (light) BudgetGradients.BannerInfoLight else BudgetGradients.BannerInfo
+        BannerTone.AMBER -> if (light) BudgetGradients.BannerAmberLight else BudgetGradients.BannerAmber
+    }
+    val content = when (tone) {
+        BannerTone.INFO -> if (light) Color(0xFF0D2736) else Color(0xFFCDE3F2)
+        BannerTone.AMBER -> if (light) Color(0xFF6A3B16) else Color(0xFFFBE3CC)
+    }
     Box(modifier.fillMaxWidth().clip(BannerShape).background(brush).padding(14.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (leadingIcon != null) {

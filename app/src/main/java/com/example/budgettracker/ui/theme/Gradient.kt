@@ -63,4 +63,30 @@ object BudgetGradients {
     val AppliedRecurring = Brush.verticalGradient(
         listOf(Color(0x1A74D9B5), Color(0x0A74D9B5)),
     )
+
+    // ---- Light-theme brand variants (design: fully-light light theme) ----
+    /** Net band hero — light blue tint, dark text. */
+    val NetBandLight = Brush.linearGradient(
+        colors = listOf(Color(0xFFE9F2FA), Color(0xFFDCEBF6), Color(0xFFCFE2F0)),
+        start = diagStart, end = diagEnd,
+    )
+
+    /** Filled (primary) button — solid navy in light (white text). */
+    val FilledButtonLight = Brush.verticalGradient(listOf(Color(0xFF0D2736), Color(0xFF0D2736)))
+
+    /** Tonal button — light navy tint (navy text). */
+    val TonalButtonLight = Brush.verticalGradient(listOf(Color(0xFFD7E8F4), Color(0xFFC7DEEE)))
+
+    /** Sticky bar — white card. */
+    val StickyBarLight = Brush.verticalGradient(listOf(Color(0xFFFFFFFF), Color(0xFFF6FAFC)))
+
+    /** Info banner — light blue tint. */
+    val BannerInfoLight = Brush.linearGradient(
+        colors = listOf(Color(0xFFE2EEF8), Color(0xFFD6E8F4)), start = diagStart, end = diagEnd,
+    )
+
+    /** Amber banner — light amber tint. */
+    val BannerAmberLight = Brush.linearGradient(
+        colors = listOf(Color(0xFFFFEBD2), Color(0xFFFCE2C0)), start = diagStart, end = diagEnd,
+    )
 }

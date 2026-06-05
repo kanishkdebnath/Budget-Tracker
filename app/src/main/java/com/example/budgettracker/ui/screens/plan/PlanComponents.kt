@@ -36,6 +36,7 @@ import com.example.budgettracker.ui.screens.categories.ColorDot
 import com.example.budgettracker.ui.screens.categories.KindChip
 import com.example.budgettracker.ui.screens.categories.parseHexColor
 import com.example.budgettracker.ui.theme.BudgetGradients
+import com.example.budgettracker.ui.theme.BudgetTheme
 
 @Composable
 fun PlanBanner(banner: PrefillBanner, modifier: Modifier = Modifier) {
@@ -124,16 +125,17 @@ fun PlanGroupCard(
 private val StickyShape = RoundedCornerShape(16.dp)
 private val StickyLabel = Color(0xFF9FB1BD) // fixed light: the bar is navy in both themes
 
-/** Floating Save bar — a rounded navy card that lifts off the content scrolling beneath it. */
+/** Floating Save bar — a rounded card that lifts off the content scrolling beneath it (navy in dark, white in light). */
 @Composable
 fun PlanSaveBar(targetCount: Int, onSave: () -> Unit, modifier: Modifier = Modifier) {
+    val light = BudgetTheme.isLight
     Row(
         modifier
             .fillMaxWidth()
             .shadow(16.dp, StickyShape, clip = false)
             .clip(StickyShape)
-            .background(BudgetGradients.StickyBar)
-            .border(1.dp, Color.White.copy(alpha = 0.07f), StickyShape)
+            .background(if (light) BudgetGradients.StickyBarLight else BudgetGradients.StickyBar)
+            .border(1.dp, if (light) Color(0x140D2736) else Color.White.copy(alpha = 0.07f), StickyShape)
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -141,7 +143,7 @@ fun PlanSaveBar(targetCount: Int, onSave: () -> Unit, modifier: Modifier = Modif
             "$targetCount ${if (targetCount == 1) "target" else "targets"}",
             modifier = Modifier.weight(1f),
             style = MaterialTheme.typography.bodyMedium,
-            color = StickyLabel,
+            color = if (light) Color(0xFF6B7A84) else StickyLabel,
         )
         GradientButton("Save targets", onClick = onSave)
     }

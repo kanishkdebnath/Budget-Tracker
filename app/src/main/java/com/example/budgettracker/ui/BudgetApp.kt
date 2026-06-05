@@ -167,7 +167,13 @@ private fun BottomNav(selectedIndex: Int, settledIndex: Int, onTabClick: (Int) -
             unselectedTextColor = scheme.onSurfaceVariant,
         )
     } else {
-        NavigationBarItemDefaults.colors()
+        NavigationBarItemDefaults.colors(
+            selectedIconColor = Color(0xFF0D2736),
+            selectedTextColor = Color(0xFF0D2736),
+            indicatorColor = Color(0xFFCFE3F1),
+            unselectedIconColor = scheme.onSurfaceVariant,
+            unselectedTextColor = scheme.onSurfaceVariant,
+        )
     }
     NavigationBar(
         containerColor = if (isDark) Color.Transparent else scheme.surface,
