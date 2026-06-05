@@ -16,7 +16,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -40,7 +39,6 @@ fun SettingsScreen(
 ) {
     val currency by viewModel.currency.collectAsStateWithLifecycle()
     val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
-    val dynamicColor by viewModel.dynamicColor.collectAsStateWithLifecycle()
     val densityMode by viewModel.densityMode.collectAsStateWithLifecycle()
     var showCurrency by remember { mutableStateOf(false) }
     var showTheme by remember { mutableStateOf(false) }
@@ -56,7 +54,6 @@ fun SettingsScreen(
         SettingsSection("Appearance") {
             SettingTile("Theme", themeMode.label, onClick = { showTheme = true })
             SettingTile("Density", densityMode.label, onClick = { showDensity = true })
-            SwitchTile("Dynamic color", "Use the system palette (Android 12+)", dynamicColor) { viewModel.setDynamicColor(it) }
         }
         SettingsSection("About") {
             SettingTile("Version", "1.0")
@@ -110,17 +107,6 @@ private fun SettingTile(title: String, value: String? = null, onClick: (() -> Un
             Text(title, style = MaterialTheme.typography.titleMedium)
             value?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
         }
-    }
-}
-
-@Composable
-private fun SwitchTile(title: String, subtitle: String?, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
-    Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-        Column(Modifier.weight(1f)) {
-            Text(title, style = MaterialTheme.typography.titleMedium)
-            subtitle?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
-        }
-        Switch(checked = checked, onCheckedChange = onCheckedChange)
     }
 }
 

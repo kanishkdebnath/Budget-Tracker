@@ -52,15 +52,11 @@ class SettingsViewModel(private val preferences: PreferencesRepository) : ViewMo
         .map { ThemeMode.fromStorage(it) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ThemeMode.SYSTEM)
 
-    val dynamicColor: StateFlow<Boolean> = preferences.dynamicColor
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
-
     val densityMode: StateFlow<DensityMode> = preferences.density
         .map { DensityMode.fromStorage(it) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DensityMode.COMFORTABLE)
 
     fun setCurrency(code: String) = viewModelScope.launch { preferences.setCurrency(code.uppercase()) }
     fun setThemeMode(mode: ThemeMode) = viewModelScope.launch { preferences.setThemeMode(mode.storageValue) }
-    fun setDynamicColor(enabled: Boolean) = viewModelScope.launch { preferences.setDynamicColor(enabled) }
     fun setDensity(mode: DensityMode) = viewModelScope.launch { preferences.setDensity(mode.storageValue) }
 }
