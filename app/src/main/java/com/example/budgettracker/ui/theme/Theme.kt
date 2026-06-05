@@ -10,6 +10,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 
@@ -76,6 +77,11 @@ object BudgetTheme {
     val density: DensityMode
         @Composable @ReadOnlyComposable
         get() = LocalDensityMode.current
+
+    /** True in light themes (background is bright). The single source for brand light/dark branching. */
+    val isLight: Boolean
+        @Composable @ReadOnlyComposable
+        get() = MaterialTheme.colorScheme.background.luminance() > 0.5f
 }
 
 @Composable
