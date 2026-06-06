@@ -49,7 +49,7 @@ fun SettingsScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         SettingsSection("Money") {
-            SettingTile("Currency", "$currency · ${Money.symbolOf(currency).trim()}", onClick = { showCurrency = true })
+            SettingTile("Currency", "${currencyFlag(currency)} $currency · ${Money.symbolOf(currency).trim()}".trim(), onClick = { showCurrency = true })
         }
         SettingsSection("Appearance") {
             SettingTile("Theme", themeMode.label, onClick = { showTheme = true })

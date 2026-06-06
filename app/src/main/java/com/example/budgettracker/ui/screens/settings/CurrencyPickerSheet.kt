@@ -45,19 +45,26 @@ fun CurrencyPickerSheet(current: String, onDismiss: () -> Unit, onSelect: (Strin
             Text("Display currency", style = MaterialTheme.typography.titleLarge)
             Spacer(Modifier.height(8.dp))
             COMMON_CURRENCIES.forEach { option ->
+                val flag = currencyFlag(option.code)
+                val symbol = Money.symbolOf(option.code).trim()
                 Row(
                     Modifier.fillMaxWidth().clickable { onSelect(option.code) }.padding(vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
+                    // The nation's flag anchors the row; falls back to the symbol if no flag can be formed.
                     Text(
-                        Money.symbolOf(option.code).trim(),
+                        flag.ifEmpty { symbol },
                         modifier = Modifier.width(40.dp),
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.headlineSmall,
                         textAlign = TextAlign.Center,
                     )
                     Column(Modifier.weight(1f)) {
                         Text(option.code, style = MaterialTheme.typography.titleMedium)
-                        Text(option.name, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(
+                            "${option.name} · $symbol",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
                     if (option.code == current) {
                         Icon(Icons.Filled.Check, contentDescription = "Selected", tint = MaterialTheme.colorScheme.primary)

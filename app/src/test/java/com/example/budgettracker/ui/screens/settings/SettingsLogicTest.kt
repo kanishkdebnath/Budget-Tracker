@@ -26,4 +26,19 @@ class SettingsLogicTest {
         assertFalse(isValidCurrencyCode("US1"))
         assertFalse(isValidCurrencyCode(""))
     }
+
+    @Test fun derivesFlagFromCurrencyCode() {
+        assertEquals("🇺🇸", currencyFlag("USD"))
+        assertEquals("🇮🇳", currencyFlag("INR"))
+        assertEquals("🇪🇺", currencyFlag("EUR"))
+        assertEquals("🇯🇵", currencyFlag("JPY"))
+        assertEquals("🇬🇧", currencyFlag("GBP"))
+    }
+
+    @Test fun flagIsCaseInsensitiveAndFallsBackWhenUnformable() {
+        assertEquals("🇺🇸", currencyFlag("usd"))
+        assertEquals("", currencyFlag("U"))
+        assertEquals("", currencyFlag(""))
+        assertEquals("", currencyFlag("1X"))
+    }
 }
