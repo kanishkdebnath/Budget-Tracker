@@ -15,7 +15,7 @@ export function Nav() {
     <header className={`fixed inset-x-0 top-0 z-50 transition-colors ${scrolled ? 'bg-bg/80 backdrop-blur-md border-b border-white/6' : ''}`}>
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
         <a href="#top" className="flex items-center gap-2.5 font-semibold">
-          <span className="h-3 w-3 rounded-full bg-brand-gradient ring-1 ring-white/20" />
+          <img src="/icon.png" alt="Budget Tracker app icon" className="h-8 w-8 rounded-[22%] ring-1 ring-white/10" />
           {APP_NAME}
         </a>
         <div className="hidden items-center gap-7 text-sm text-muted md:flex">
