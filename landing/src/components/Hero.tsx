@@ -24,14 +24,18 @@ export function Hero() {
           </div>
         </motion.div>
         <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.7, delay: 0.1 }}>
-          <div className="mx-auto mb-5 w-[260px] max-w-full rounded-card bg-brand-gradient px-5 py-4 line-border">
-            <div className="flex justify-between text-xs text-white/70">
-              <span>Income</span><span>Expense</span><span>Net</span>
+          <div className="mx-auto mb-5 grid w-[260px] max-w-full grid-cols-3 gap-2 rounded-card bg-brand-gradient px-5 py-4 line-border">
+            <div className="flex flex-col">
+              <span className="text-[11px] text-white/65">Income</span>
+              <CountUp to={78000} prefix="₹" className="text-sm font-semibold text-income" />
             </div>
-            <div className="mt-1 flex justify-between text-lg font-semibold">
-              <CountUp to={78000} prefix="₹" className="text-income" />
-              <CountUp to={36000} prefix="₹" className="text-white" />
-              <CountUp to={42000} prefix="₹" className="text-income" />
+            <div className="flex flex-col">
+              <span className="text-[11px] text-white/65">Expense</span>
+              <CountUp to={36000} prefix="₹" className="text-sm font-semibold text-white" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[11px] text-white/65">Net</span>
+              <CountUp to={42000} prefix="₹" className="text-sm font-semibold text-income" />
             </div>
           </div>
           <PhoneFrame src="/screens/log.png" alt="Budget Tracker Log screen" />
