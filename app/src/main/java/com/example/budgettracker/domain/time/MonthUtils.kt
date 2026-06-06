@@ -35,6 +35,12 @@ object MonthUtils {
         return ym.format(DateTimeFormatter.ofPattern("MMMM yyyy", locale))
     }
 
+    /** Compact month label like "Jun 2026" (e.g. for the recurring applied-date pill). */
+    fun monthLabelShort(month: String, locale: Locale = Locale.getDefault()): String {
+        val ym = YearMonth.parse(month)
+        return ym.format(DateTimeFormatter.ofPattern("MMM yyyy", locale))
+    }
+
     /**
      * Epoch millis for [dayOfMonth] of [month] at [hour] local time — the instant a recurring
      * template's transaction is dated when applied (§7.4). [dayOfMonth] is 1–28.

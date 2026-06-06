@@ -13,8 +13,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.Schedule
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -25,7 +23,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
 import com.example.budgettracker.domain.money.Money
+import com.example.budgettracker.domain.time.MonthUtils
 import com.example.budgettracker.ui.components.BannerTone
+import com.example.budgettracker.ui.components.BudgetCard
 import com.example.budgettracker.ui.components.GradientBanner
 import com.example.budgettracker.ui.components.GradientButton
 import com.example.budgettracker.ui.components.GradientButtonTone
@@ -41,10 +41,11 @@ fun RecurringDueBanner(count: Int, modifier: Modifier = Modifier) {
     )
 }
 
+/** Section label above each list, with its row count (e.g. "ACTIVE · 3"). */
 @Composable
-fun SectionHeader(text: String, modifier: Modifier = Modifier) {
+fun SectionHeader(text: String, count: Int, modifier: Modifier = Modifier) {
     Text(
-        text.uppercase(),
+        "${text.uppercase()} · $count",
         modifier = modifier.padding(start = 4.dp, top = 4.dp),
         style = MaterialTheme.typography.labelMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -59,13 +60,7 @@ fun RecurringCard(
     onApply: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val applied = row.state == RecurringState.APPLIED
-    val containerColor =
-        if (applied) BudgetTheme.semanticColors.income.copy(alpha = 0.10f) else MaterialTheme.colorScheme.surface
-    Card(
-        modifier = modifier.fillMaxWidth().clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(containerColor = containerColor),
-    ) {
+    BudgetCard(modifier.clickable(onClick = onClick)) {
         Row(
             Modifier.fillMaxWidth().padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -84,7 +79,7 @@ fun RecurringCard(
             }
             Spacer(Modifier.width(12.dp))
             when (row.state) {
-                RecurringState.APPLIED -> AppliedPill()
+                RecurringState.APPLIED -> AppliedPill(row.template.lastRunMonth)
                 RecurringState.ACTIONABLE -> GradientButton("Apply", onClick = onApply, tone = GradientButtonTone.TONAL)
                 RecurringState.INACTIVE -> StatePill("Inactive", MaterialTheme.colorScheme.onSurfaceVariant)
             }
@@ -92,17 +87,19 @@ fun RecurringCard(
     }
 }
 
+/** Green check pill confirming the template was applied, carrying the month it ran (§F5.3). */
 @Composable
-private fun AppliedPill() {
+private fun AppliedPill(lastRunMonth: String?) {
     val color = BudgetTheme.semanticColors.income
+    val label = lastRunMonth?.let { MonthUtils.monthLabelShort(it) } ?: "Applied"
     Surface(shape = RoundedCornerShape(50), color = color.copy(alpha = 0.16f)) {
         Row(
             Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(16.dp), tint = color)
+            Icon(Icons.Filled.Check, contentDescription = "Applied", modifier = Modifier.size(16.dp), tint = color)
             Spacer(Modifier.width(4.dp))
-            Text("Applied", style = MaterialTheme.typography.labelLarge, color = color)
+            Text(label, style = MaterialTheme.typography.labelLarge, color = color)
         }
     }
 }
