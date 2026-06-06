@@ -16,3 +16,7 @@ local.properties
 .superpowers/
 .playwright-mcp/
 /v*.png
+
+# Landing page (separate npm project)
+landing/node_modules/
+landing/dist/
