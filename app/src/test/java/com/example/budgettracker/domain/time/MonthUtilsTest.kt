@@ -40,6 +40,11 @@ class MonthUtilsTest {
         assertEquals("June 2026", MonthUtils.monthLabel("2026-06", Locale.ENGLISH))
     }
 
+    @Test fun monthLabelShortIsCompact() {
+        assertEquals("Jun 2026", MonthUtils.monthLabelShort("2026-06", Locale.ENGLISH))
+        assertEquals("Jan 2026", MonthUtils.monthLabelShort("2026-01", Locale.ENGLISH))
+    }
+
     @Test fun instantForDayUsesLocalNineAm() {
         val utcMillis = MonthUtils.instantForDay("2026-06", 5, utc)
         assertEquals(Instant.parse("2026-06-05T09:00:00Z"), Instant.ofEpochMilli(utcMillis))

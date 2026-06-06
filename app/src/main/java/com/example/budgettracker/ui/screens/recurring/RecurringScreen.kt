@@ -76,12 +76,13 @@ fun RecurringScreen(
         } else {
             LazyColumn(
                 modifier = Modifier.padding(padding).fillMaxSize(),
-                contentPadding = PaddingValues(16.dp),
+                // Extra bottom inset so the last card clears the floating "New" FAB (~56dp + 16dp margin).
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 88.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 if (sections.dueCount > 0) item { RecurringDueBanner(sections.dueCount) }
                 if (sections.active.isNotEmpty()) {
-                    item { SectionHeader("Active") }
+                    item { SectionHeader("Active", sections.active.size) }
                     items(sections.active, key = { it.template.id }) { row ->
                         RecurringCard(
                             row, currency,
@@ -91,7 +92,7 @@ fun RecurringScreen(
                     }
                 }
                 if (sections.inactive.isNotEmpty()) {
-                    item { SectionHeader("Inactive") }
+                    item { SectionHeader("Inactive", sections.inactive.size) }
                     items(sections.inactive, key = { it.template.id }) { row ->
                         RecurringCard(
                             row, currency,
