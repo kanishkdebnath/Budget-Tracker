@@ -43,6 +43,24 @@ val COMMON_CURRENCIES = listOf(
 
 fun isValidCurrencyCode(code: String): Boolean = code.matches(Regex("^[A-Za-z]{3}$"))
 
+/**
+ * Flag emoji for a currency, derived from the ISO-4217 convention that the first two letters are the
+ * issuing country/region (e.g. "USD" → 🇺🇸, "INR" → 🇮🇳, "EUR" → 🇪🇺). Built from the two Unicode
+ * regional-indicator symbols. Returns "" when the code has fewer than two A–Z letters, so callers can
+ * fall back to the currency symbol. (Supranational "X"-prefixed codes form an unassigned pair and
+ * simply render as their two letters.)
+ */
+fun currencyFlag(code: String): String {
+    if (code.length < 2) return ""
+    val a = code[0].uppercaseChar()
+    val b = code[1].uppercaseChar()
+    if (a !in 'A'..'Z' || b !in 'A'..'Z') return ""
+    return buildString {
+        appendCodePoint(0x1F1E6 + (a - 'A'))
+        appendCodePoint(0x1F1E6 + (b - 'A'))
+    }
+}
+
 class SettingsViewModel(private val preferences: PreferencesRepository) : ViewModel() {
 
     val currency: StateFlow<String> = preferences.currency
