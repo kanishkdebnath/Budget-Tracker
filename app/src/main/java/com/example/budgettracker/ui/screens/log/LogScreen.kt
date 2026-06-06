@@ -85,7 +85,11 @@ fun LogScreen(
                     subtitle = "Tap + to add your first income or expense.",
                 )
             } else {
-                LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                LazyColumn(
+                    // Extra bottom inset so the last card clears the floating "Add" FAB (~56dp + 16dp margin).
+                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 88.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
                     itemsIndexed(uiState.sections, key = { _, it -> it.dayLabel }) { index, section ->
                         DateCard(
                             section, currency,
