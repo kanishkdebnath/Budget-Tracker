@@ -6,7 +6,7 @@ import { PhoneFrame } from '../ui/PhoneFrame'
 export function FeaturePanel({ feature, index, onActivate }: { feature: Feature; index: number; onActivate: (i: number) => void }) {
   return (
     <motion.div
-      className="flex min-h-[80vh] flex-col justify-center py-10 lg:min-h-screen"
+      className="flex min-h-[80vh] flex-col items-start justify-center py-10 lg:min-h-screen"
       onViewportEnter={() => onActivate(index)}
       viewport={{ margin: '-50% 0px -50% 0px' }}
     >
