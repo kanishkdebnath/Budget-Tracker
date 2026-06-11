@@ -37,6 +37,7 @@ import com.example.budgettracker.domain.report.GroupReport
 import com.example.budgettracker.ui.components.BannerTone
 import com.example.budgettracker.ui.components.BudgetCard
 import com.example.budgettracker.ui.components.GradientBanner
+import com.example.budgettracker.ui.components.CategoryIconChip
 import com.example.budgettracker.ui.screens.categories.ColorDot
 import com.example.budgettracker.ui.screens.categories.KindChip
 import com.example.budgettracker.ui.screens.categories.parseHexColor
@@ -113,13 +114,13 @@ fun ReportGroupCard(report: GroupReport, currency: String, modifier: Modifier = 
                     DeltaPill(report.actualSubtotal - report.targetSubtotal, report.kind, currency)
                 }
             }
-            report.rows.forEach { row -> ReportRow(row, currency) }
+            report.rows.forEach { row -> ReportRow(row, currency, report.group.color) }
         }
     }
 }
 
 @Composable
-private fun ReportRow(row: CategoryReportRow, currency: String) {
+private fun ReportRow(row: CategoryReportRow, currency: String, groupColor: String) {
     val density = BudgetTheme.density
     Row(
         Modifier.fillMaxWidth()
@@ -127,6 +128,12 @@ private fun ReportRow(row: CategoryReportRow, currency: String) {
             .padding(horizontal = 16.dp, vertical = density.rowPaddingVertical),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        CategoryIconChip(
+            row.category.icon,
+            row.category.color?.let { parseHexColor(it) } ?: parseHexColor(groupColor),
+            size = 26.dp,
+        )
+        Spacer(Modifier.width(10.dp))
         Text(
             row.category.name,
             modifier = Modifier.weight(1f),

@@ -32,6 +32,7 @@ import com.example.budgettracker.ui.components.BannerTone
 import com.example.budgettracker.ui.components.BudgetCard
 import com.example.budgettracker.ui.components.GradientBanner
 import com.example.budgettracker.ui.components.GradientButton
+import com.example.budgettracker.ui.components.CategoryIconChip
 import com.example.budgettracker.ui.screens.categories.ColorDot
 import com.example.budgettracker.ui.screens.categories.KindChip
 import com.example.budgettracker.ui.screens.categories.parseHexColor
@@ -106,6 +107,12 @@ fun PlanGroupCard(
                     Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
+                    CategoryIconChip(
+                        category.icon,
+                        category.color?.let { parseHexColor(it) } ?: parseHexColor(group.group.color),
+                        size = 26.dp,
+                    )
+                    Spacer(Modifier.width(10.dp))
                     Text(category.name, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
                     OutlinedTextField(
                         value = inputs[category.id].orEmpty(),

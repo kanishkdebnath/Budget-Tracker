@@ -22,7 +22,7 @@ import com.example.budgettracker.data.entity.TransactionEntity
         Target::class,
         RecurringTemplate::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = true,
 )
 @TypeConverters(Converters::class)

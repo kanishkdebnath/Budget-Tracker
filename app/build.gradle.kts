@@ -42,6 +42,12 @@ android {
             isIncludeAndroidResources = true // required for Robolectric
         }
     }
+    sourceSets {
+        // Make the exported Room schemas readable by MigrationTestHelper under Robolectric.
+        // Robolectric reads assets from the debug merged-assets folder (android_merged_assets in
+        // test_config.properties), so the schemas must be on the debug source set, not "test".
+        getByName("debug").assets.srcDirs(files("$projectDir/schemas"))
+    }
 }
 
 // Export Room schemas for migration history / migration tests.

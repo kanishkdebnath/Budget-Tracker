@@ -186,6 +186,7 @@ Indices: `(archived, order)`; **unique** `(name)` (case-insensitive — store/co
 | `name` | `String` | 1–80 chars |
 | `kind` | `Kind` enum | `income` \| `expense` |
 | `color` | `String?` | optional `#RRGGBB` |
+| `icon` | `String?` | optional CategoryIcons registry key (e.g. `restaurant`); null → color dot |
 | `order` | `Int` | per-group order |
 | `archived` | `Boolean` | default `false` |
 | `createdAt` / `updatedAt` | `Long` | |

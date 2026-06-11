@@ -1,15 +1,12 @@
 package com.example.budgettracker.ui.screens.log
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -27,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import com.example.budgettracker.data.entity.Kind
 import com.example.budgettracker.domain.money.Money
 import com.example.budgettracker.ui.components.BudgetCard
+import com.example.budgettracker.ui.components.CategoryIconChip
 import com.example.budgettracker.ui.components.chipPop
 import com.example.budgettracker.ui.screens.categories.parseHexColor
 import com.example.budgettracker.ui.theme.BudgetTheme
@@ -114,7 +112,7 @@ private fun TxnRowItem(row: TxnRow, currency: String, onClick: () -> Unit) {
             .padding(horizontal = 16.dp, vertical = density.rowPaddingVertical),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(Modifier.width(3.dp).height(36.dp).background(parseHexColor(row.leadingColor), RoundedCornerShape(2.dp)))
+        CategoryIconChip(row.iconKey, parseHexColor(row.leadingColor), size = 32.dp)
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
             Text(title, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)

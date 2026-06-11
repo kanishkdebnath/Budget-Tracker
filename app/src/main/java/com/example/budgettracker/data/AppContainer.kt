@@ -7,6 +7,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.Room
 import com.example.budgettracker.data.db.BudgetDatabase
 import com.example.budgettracker.data.db.DatabaseSeeder
+import com.example.budgettracker.data.db.MIGRATION_1_2
 import com.example.budgettracker.data.repository.CategoryRepository
 import com.example.budgettracker.data.repository.PreferencesRepository
 import com.example.budgettracker.data.repository.RecurringRepository
@@ -21,7 +22,9 @@ private val Context.settingsDataStore: DataStore<Preferences> by preferencesData
  */
 class AppContainer(context: Context) {
 
-    private val database = Room.databaseBuilder(context, BudgetDatabase::class.java, "budget.db").build()
+    private val database = Room.databaseBuilder(context, BudgetDatabase::class.java, "budget.db")
+        .addMigrations(MIGRATION_1_2)
+        .build()
     private val dataStore = context.settingsDataStore
 
     val categoryRepository = CategoryRepository(database.categoryGroupDao(), database.categoryDao())

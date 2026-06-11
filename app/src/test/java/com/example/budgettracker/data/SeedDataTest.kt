@@ -29,4 +29,22 @@ class SeedDataTest {
         val nonIncome = SeedData.GROUPS.filter { it.name != "Income" }.flatMap { it.categories }
         assertEquals(emptyList<Kind>(), nonIncome.map { it.kind }.filter { it != Kind.EXPENSE })
     }
+
+    @Test
+    fun seedCategoriesCarryIcons() {
+        // Assert every seed icon key — these must stay in lock-step with MIGRATION_1_2's backfill,
+        // so a typo in any one is a real (silent, runtime-only) bug worth catching here.
+        val iconsByName = SeedData.GROUPS.flatMap { it.categories }.associate { it.name to it.icon }
+        assertEquals(
+            mapOf(
+                "Salary" to "payments",
+                "Rent" to "home",
+                "Electricity" to "bolt",
+                "Groceries" to "shopping_cart",
+                "Transport" to "directions_car",
+                "Dining" to "restaurant",
+            ),
+            iconsByName,
+        )
+    }
 }

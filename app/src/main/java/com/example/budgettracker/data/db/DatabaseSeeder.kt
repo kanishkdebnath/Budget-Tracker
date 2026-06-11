@@ -26,7 +26,7 @@ class DatabaseSeeder(
                 group.categories.forEachIndexed { categoryOrder, category ->
                     categoryDao.insert(
                         Category(
-                            groupId = groupId, name = category.name, kind = category.kind,
+                            groupId = groupId, name = category.name, kind = category.kind, icon = category.icon,
                             order = categoryOrder, createdAt = t, updatedAt = t,
                         ),
                     )

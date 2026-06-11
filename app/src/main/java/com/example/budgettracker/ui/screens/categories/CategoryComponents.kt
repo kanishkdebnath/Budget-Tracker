@@ -39,6 +39,7 @@ import com.example.budgettracker.data.entity.Category
 import com.example.budgettracker.data.entity.Kind
 import com.example.budgettracker.domain.report.inferGroupKind
 import com.example.budgettracker.ui.components.BudgetCard
+import com.example.budgettracker.ui.components.CategoryIconChip
 import com.example.budgettracker.ui.components.chipPop
 import com.example.budgettracker.ui.theme.BudgetTheme
 
@@ -190,7 +191,7 @@ private fun CategoryRow(category: Category, groupColor: Color, onClick: () -> Un
             .padding(horizontal = 16.dp, vertical = density.rowPaddingVertical),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        ColorDot(category.color?.let { parseHexColor(it) } ?: groupColor, size = 10.dp)
+        CategoryIconChip(category.icon, category.color?.let { parseHexColor(it) } ?: groupColor, size = 32.dp)
         Spacer(Modifier.width(12.dp))
         Text(category.name, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
     }

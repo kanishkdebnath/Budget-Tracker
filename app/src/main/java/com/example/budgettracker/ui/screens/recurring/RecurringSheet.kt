@@ -36,6 +36,8 @@ import androidx.compose.ui.unit.dp
 import com.example.budgettracker.data.entity.Category
 import com.example.budgettracker.data.entity.RecurringTemplate
 import com.example.budgettracker.domain.money.Money
+import com.example.budgettracker.ui.components.CategoryIconChip
+import com.example.budgettracker.ui.screens.categories.parseHexColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -116,7 +118,17 @@ private fun CategoryDropdown(categories: List<Category>, selectedId: Long?, onSe
         )
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             categories.forEach { category ->
-                DropdownMenuItem(text = { Text(category.name) }, onClick = { onSelect(category.id); expanded = false })
+                DropdownMenuItem(
+                    text = { Text(category.name) },
+                    leadingIcon = {
+                        CategoryIconChip(
+                            category.icon,
+                            category.color?.let { parseHexColor(it) } ?: MaterialTheme.colorScheme.onSurfaceVariant,
+                            size = 28.dp,
+                        )
+                    },
+                    onClick = { onSelect(category.id); expanded = false },
+                )
             }
         }
     }
