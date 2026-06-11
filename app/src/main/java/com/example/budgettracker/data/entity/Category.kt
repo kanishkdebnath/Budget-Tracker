@@ -31,6 +31,7 @@ data class Category(
     val name: String,
     val kind: Kind,
     val color: String? = null,    // optional #RRGGBB
+    val icon: String? = null,     // optional CategoryIcons registry key, e.g. "restaurant"
     val order: Int,               // per-group order
     val archived: Boolean = false,
     val createdAt: Long,
