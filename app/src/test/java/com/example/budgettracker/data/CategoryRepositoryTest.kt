@@ -80,4 +80,12 @@ class CategoryRepositoryTest {
         val live = db.categoryGroupDao().observeLive().first()
         assertEquals(listOf("C", "A", "B"), live.map { it.name })
     }
+
+    @Test
+    fun createCategory_persistsIcon() = runTest {
+        val groupId = (repo.createGroup("G", "#10b981", 0) as OpResult.Success).id
+        val catId = (repo.createCategory(groupId, "Coffee", Kind.EXPENSE, null, 0, "local_cafe") as OpResult.Success).id
+        val saved = db.categoryDao().getById(catId)
+        assertEquals("local_cafe", saved?.icon)
+    }
 }

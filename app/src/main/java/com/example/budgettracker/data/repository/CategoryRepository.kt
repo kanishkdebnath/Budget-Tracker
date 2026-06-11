@@ -34,14 +34,14 @@ class CategoryRepository(
         return OpResult.Success(id)
     }
 
-    suspend fun createCategory(groupId: Long, name: String, kind: Kind, color: String?, order: Int): OpResult {
+    suspend fun createCategory(groupId: Long, name: String, kind: Kind, color: String?, order: Int, icon: String? = null): OpResult {
         val trimmed = name.trim()
         if (categoryDao.findLiveByName(trimmed) != null) {
             return OpResult.Failure("A category named \"$trimmed\" already exists")
         }
         val t = now()
         val id = categoryDao.insert(
-            Category(groupId = groupId, name = trimmed, kind = kind, color = color, order = order, createdAt = t, updatedAt = t),
+            Category(groupId = groupId, name = trimmed, kind = kind, color = color, icon = icon, order = order, createdAt = t, updatedAt = t),
         )
         return OpResult.Success(id)
     }

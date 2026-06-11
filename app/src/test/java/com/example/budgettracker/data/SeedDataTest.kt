@@ -29,4 +29,11 @@ class SeedDataTest {
         val nonIncome = SeedData.GROUPS.filter { it.name != "Income" }.flatMap { it.categories }
         assertEquals(emptyList<Kind>(), nonIncome.map { it.kind }.filter { it != Kind.EXPENSE })
     }
+
+    @Test
+    fun seedCategoriesCarryIcons() {
+        val all = SeedData.GROUPS.flatMap { it.categories }
+        assertEquals("restaurant", all.first { it.name == "Dining" }.icon)
+        assertEquals("payments", all.first { it.name == "Salary" }.icon)
+    }
 }
