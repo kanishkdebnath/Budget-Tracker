@@ -150,11 +150,11 @@ fun CategoriesScreen(
             groups = liveGroups,
             defaultGroupId = current.defaultGroupId,
             onDismiss = { sheet = null },
-            onSave = { groupId, name, kind, color ->
+            onSave = { groupId, name, kind, color, icon ->
                 if (current.category == null) {
-                    viewModel.createCategory(groupId, name, kind, color)
+                    viewModel.createCategory(groupId, name, kind, color, icon)
                 } else {
-                    viewModel.updateCategory(current.category.copy(groupId = groupId, name = name, kind = kind, color = color))
+                    viewModel.updateCategory(current.category.copy(groupId = groupId, name = name, kind = kind, color = color, icon = icon))
                 }
                 sheet = null
             },

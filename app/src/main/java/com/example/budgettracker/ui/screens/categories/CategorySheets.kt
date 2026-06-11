@@ -15,9 +15,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import com.example.budgettracker.ui.components.CategoryIconChip
 import com.example.budgettracker.ui.components.GradientButton
+import com.example.budgettracker.ui.icons.CATEGORY_ICON_SECTIONS
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -92,13 +96,17 @@ fun CategoryFormSheet(
     groups: List<CategoryGroup>,
     defaultGroupId: Long?,
     onDismiss: () -> Unit,
-    onSave: (groupId: Long, name: String, kind: Kind, color: String?) -> Unit,
+    onSave: (groupId: Long, name: String, kind: Kind, color: String?, icon: String?) -> Unit,
     onArchive: () -> Unit,
 ) {
     var name by remember { mutableStateOf(existing?.name ?: "") }
     var groupId by remember { mutableStateOf(existing?.groupId ?: defaultGroupId ?: groups.firstOrNull()?.id) }
     var kind by remember { mutableStateOf(existing?.kind ?: Kind.EXPENSE) }
     var color by remember { mutableStateOf(existing?.color) }
+    var icon by remember { mutableStateOf(existing?.icon) }
+    var showIconPicker by remember { mutableStateOf(false) }
+    val tint = color?.let { parseHexColor(it) } ?: MaterialTheme.colorScheme.primary
+
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(
             Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).imePadding().padding(16.dp),
@@ -117,6 +125,22 @@ fun CategoryFormSheet(
                     )
                 }
             }
+            Text("Icon", style = MaterialTheme.typography.labelLarge)
+            Row(
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable { showIconPicker = true }
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
+                    .padding(horizontal = 12.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                CategoryIconChip(icon, tint, size = 36.dp)
+                Spacer(Modifier.width(12.dp))
+                Text(
+                    iconLabelFor(icon) ?: "No icon",
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.weight(1f),
+                )
+                Text("Change ›", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
             Text("Color (optional)", style = MaterialTheme.typography.labelLarge)
             ColorPickerRow(selectedHex = color, allowNone = true, onSelect = { color = it })
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -124,14 +148,27 @@ fun CategoryFormSheet(
                 Spacer(Modifier.weight(1f))
                 GradientButton(
                     "Save",
-                    onClick = { groupId?.let { onSave(it, name, kind, color) } },
+                    onClick = { groupId?.let { onSave(it, name, kind, color, icon) } },
                     enabled = name.isNotBlank() && groupId != null,
                 )
             }
             Spacer(Modifier.height(8.dp))
         }
     }
+
+    if (showIconPicker) {
+        IconPickerSheet(
+            selectedKey = icon,
+            tint = tint,
+            onSelect = { icon = it; showIconPicker = false },
+            onDismiss = { showIconPicker = false },
+        )
+    }
 }
+
+/** Display label for the form's selected icon key (first word of its search label), or null when none. */
+private fun iconLabelFor(key: String?): String? =
+    key?.let { k -> CATEGORY_ICON_SECTIONS.flatMap { it.icons }.firstOrNull { it.key == k }?.label?.substringBefore(' ') }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
