@@ -31,6 +31,7 @@ data class TxnRow(
     val categoryName: String,
     val groupName: String,
     val leadingColor: String,   // category.color ?: group.color
+    val iconKey: String?,       // category.icon
     val kind: Kind,
     val amount: Long,
     val note: String?,
@@ -101,6 +102,7 @@ fun buildLogState(
                         categoryName = r.category.name,
                         groupName = group?.name ?: "",
                         leadingColor = r.category.color ?: group?.color ?: "#64748b",
+                        iconKey = r.category.icon,
                         kind = r.category.kind,
                         amount = r.txn.amount,
                         note = r.txn.description,

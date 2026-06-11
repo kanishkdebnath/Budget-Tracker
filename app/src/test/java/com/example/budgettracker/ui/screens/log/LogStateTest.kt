@@ -71,4 +71,12 @@ class LogStateTest {
         assertEquals("Thu", section.weekday)
         assertEquals("Essentials", section.rows.single().groupName)
     }
+
+    @Test fun rowCarriesCategoryIcon() {
+        val category = Category(id = 1, groupId = 1, name = "Dining", kind = Kind.EXPENSE, icon = "restaurant", order = 0, createdAt = 0, updatedAt = 0)
+        val group = CategoryGroup(id = 1, name = "Leisure", color = "#8b5cf6", order = 0, createdAt = 0, updatedAt = 0)
+        val txn = TransactionEntity(id = 1, categoryId = 1, amount = 1000, date = 0, createdAt = 0, updatedAt = 0)
+        val state = buildLogState(listOf(txn), mapOf(1L to category), mapOf(1L to group), TxnFilter.ALL, ZoneId.of("UTC"))
+        assertEquals("restaurant", state.sections.first().rows.first().iconKey)
+    }
 }
