@@ -114,13 +114,13 @@ fun ReportGroupCard(report: GroupReport, currency: String, modifier: Modifier = 
                     DeltaPill(report.actualSubtotal - report.targetSubtotal, report.kind, currency)
                 }
             }
-            report.rows.forEach { row -> ReportRow(row, currency) }
+            report.rows.forEach { row -> ReportRow(row, currency, report.group.color) }
         }
     }
 }
 
 @Composable
-private fun ReportRow(row: CategoryReportRow, currency: String) {
+private fun ReportRow(row: CategoryReportRow, currency: String, groupColor: String) {
     val density = BudgetTheme.density
     Row(
         Modifier.fillMaxWidth()
@@ -130,7 +130,7 @@ private fun ReportRow(row: CategoryReportRow, currency: String) {
     ) {
         CategoryIconChip(
             row.category.icon,
-            row.category.color?.let { parseHexColor(it) } ?: MaterialTheme.colorScheme.onSurfaceVariant,
+            row.category.color?.let { parseHexColor(it) } ?: parseHexColor(groupColor),
             size = 26.dp,
         )
         Spacer(Modifier.width(10.dp))

@@ -17,6 +17,7 @@ import org.robolectric.annotation.Config
 class Migration1To2Test {
 
     private val dbName = "migration-test.db"
+    private val dbName2 = "migration-test-2.db"
 
     @get:Rule
     val helper = MigrationTestHelper(
@@ -52,6 +53,27 @@ class Migration1To2Test {
             c.moveToNext()
             assertEquals("My Custom", c.getString(0))
             assertNull(c.getString(1))
+        }
+        db.close()
+    }
+
+    @Test
+    fun migrate1To2_backfillsAnotherSeedName() {
+        helper.createDatabase(dbName2, 1).apply {
+            execSQL(
+                "INSERT INTO category_group (id, name, color, `order`, archived, createdAt, updatedAt) " +
+                    "VALUES (1, 'Bills', '#ef4444', 0, 0, 0, 0)",
+            )
+            execSQL(
+                "INSERT INTO category (id, groupId, name, kind, color, `order`, archived, createdAt, updatedAt) " +
+                    "VALUES (1, 1, 'Electricity', 'EXPENSE', NULL, 0, 0, 0, 0)",
+            )
+            close()
+        }
+        val db = helper.runMigrationsAndValidate(dbName2, 2, true, MIGRATION_1_2)
+        db.query("SELECT icon FROM category WHERE name = 'Electricity'").use { c ->
+            c.moveToFirst()
+            assertEquals("bolt", c.getString(0))
         }
         db.close()
     }
