@@ -285,7 +285,7 @@ categoryDao.insert(
 In `CategoryRepository.kt`, update `createCategory` (lines 37-47):
 
 ```kotlin
-suspend fun createCategory(groupId: Long, name: String, kind: Kind, color: String?, icon: String?, order: Int): OpResult {
+suspend fun createCategory(groupId: Long, name: String, kind: Kind, color: String?, order: Int, icon: String? = null): OpResult {
     val trimmed = name.trim()
     if (categoryDao.findLiveByName(trimmed) != null) {
         return OpResult.Failure("A category named \"$trimmed\" already exists")
@@ -298,7 +298,7 @@ suspend fun createCategory(groupId: Long, name: String, kind: Kind, color: Strin
 }
 ```
 
-> Note: this changes the `createCategory` signature. Task 5 updates the only production caller (`CategoriesViewModel.createCategory`). The build stays red until then — that's expected; commit this task only after its own tests pass via the concrete `--tests` filter below, and run the full `./gradlew test` at the end of Task 5.
+> **Important:** `icon` is added as the **last** parameter **with a default** (`icon: String? = null`). This keeps the existing 5-arg caller (`CategoriesViewModel.createCategory` → `repository.createCategory(groupId, name, kind, color, order)`) and any existing 5-arg test calls compiling unchanged, so **the build stays green after this commit**. Task 5 updates the ViewModel to pass the real `icon` as the 6th argument. Do NOT insert `icon` before `order`.
 
 - [ ] **Step 4: Write the seed + repository tests**
 
@@ -320,7 +320,7 @@ In `CategoryRepositoryTest.kt`, add (mirror the existing setup in that file — 
 @Test
 fun createCategory_persistsIcon() = runTest {
     val groupId = (repository.createGroup("G", "#10b981", 0) as OpResult.Success).id
-    val catId = (repository.createCategory(groupId, "Coffee", Kind.EXPENSE, null, "local_cafe", 0) as OpResult.Success).id
+    val catId = (repository.createCategory(groupId, "Coffee", Kind.EXPENSE, null, 0, "local_cafe") as OpResult.Success).id
     val saved = db.categoryDao().getById(catId)
     assertEquals("local_cafe", saved?.icon)
 }
@@ -924,7 +924,7 @@ In `CategoriesViewModel.kt`, update `createCategory` (lines 108-111):
 ```kotlin
 fun createCategory(groupId: Long, name: String, kind: Kind, color: String?, icon: String?) = viewModelScope.launch {
     val order = repository.observeCategories().first().count { it.groupId == groupId }
-    report(repository.createCategory(groupId, name, kind, color, icon, order))
+    report(repository.createCategory(groupId, name, kind, color, order, icon))
 }
 ```
 
@@ -973,7 +973,7 @@ import com.example.budgettracker.ui.components.CategoryIconChip
 - [ ] **Step 6: Compile and run the full test suite**
 
 Run: `./gradlew :app:compileDebugKotlin && ./gradlew test`
-Expected: BUILD SUCCESSFUL; all unit tests PASS (this is the point where Task 2's `createCategory` signature change is fully reconciled with its caller).
+Expected: BUILD SUCCESSFUL; all unit tests PASS (the ViewModel now passes the real picked `icon` as `createCategory`'s 6th argument instead of relying on the default).
 
 - [ ] **Step 7: Visual check (manual)**
 
@@ -1276,4 +1276,4 @@ The human reviews and merges; do not self-merge.
 - **Spec coverage:** §Architecture data layer → Task 1 (column, migration, backfill, schema, wiring) + Task 2 (seed, repo). §Icon registry → Task 3. §Shared render component → Task 4. §Form + picker → Task 5. §Surfaces table (Categories/Log/dropdowns/Report/Plan) → Tasks 5/6/7. §Testing (registry, migration, seed, repo, buildLogState) → Tasks 1/2/3/6. §Out-of-scope (no group icons, no export) → respected (no `CategoryGroup`/`export/` changes). §Docs → Task 8. No gaps.
 - **Placeholder scan:** No TBD/TODO; every code step shows full code; the icon set is a concrete ~60-entry starter (seed keys pinned) with an explicit "extend to ~100 following the same pattern" instruction (not a placeholder — it compiles and passes tests as written).
 - **Type consistency:** `createCategory(groupId, name, kind, color, icon, order)` defined in Task 2 and called in Task 5 ViewModel — match. `onSave: (Long, String, Kind, String?, String?)` defined in Task 5 sheet and called in Task 5 screen — match. `CategoryIconChip(iconKey, color, modifier, size)` defined in Task 4, called in Tasks 5/6/7 with `(key, color, size = …)` — match. `iconVectorForKey`/`searchIcons`/`CATEGORY_ICON_SECTIONS` defined in Task 3, used in Tasks 4/5 — match. `TxnRow.iconKey` defined and populated in Task 6 — match.
-- **Ordering note:** Task 2 intentionally leaves the build red (signature change) until Task 5 updates the caller; both tasks call this out and Task 5 Step 6 runs the full suite to reconcile.
+- **Ordering note:** `createCategory`'s new `icon` param is last-with-default, so every commit compiles and stays green; Task 5 swaps the ViewModel from the default to the real picked icon (6th arg). No red-build window.
