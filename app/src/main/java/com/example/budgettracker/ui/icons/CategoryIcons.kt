@@ -180,6 +180,9 @@ private val byKey: Map<String, CategoryIcon> =
 /** Resolve a stored key to its vector; null for a null or unrecognized key (forward-compatible). */
 fun iconVectorForKey(key: String?): ImageVector? = key?.let { byKey[it]?.vector }
 
+/** Short display label for a stored key (first word of its search label); null for null/unknown. */
+fun iconLabelFor(key: String?): String? = key?.let { byKey[it]?.label?.substringBefore(' ') }
+
 /** Filter the full set by a case-insensitive substring of label or key; blank query returns all. */
 fun searchIcons(query: String): List<CategoryIcon> {
     val q = query.trim()

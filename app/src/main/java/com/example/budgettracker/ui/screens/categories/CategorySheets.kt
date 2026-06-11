@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,9 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import com.example.budgettracker.ui.components.CategoryIconChip
-import com.example.budgettracker.ui.components.GradientButton
-import com.example.budgettracker.ui.icons.CATEGORY_ICON_SECTIONS
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -46,6 +43,9 @@ import androidx.compose.ui.unit.dp
 import com.example.budgettracker.data.entity.Category
 import com.example.budgettracker.data.entity.CategoryGroup
 import com.example.budgettracker.data.entity.Kind
+import com.example.budgettracker.ui.components.CategoryIconChip
+import com.example.budgettracker.ui.components.GradientButton
+import com.example.budgettracker.ui.icons.iconLabelFor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -165,10 +165,6 @@ fun CategoryFormSheet(
         )
     }
 }
-
-/** Display label for the form's selected icon key (first word of its search label), or null when none. */
-private fun iconLabelFor(key: String?): String? =
-    key?.let { k -> CATEGORY_ICON_SECTIONS.flatMap { it.icons }.firstOrNull { it.key == k }?.label?.substringBefore(' ') }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
