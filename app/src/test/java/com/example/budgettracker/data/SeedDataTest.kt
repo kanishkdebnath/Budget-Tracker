@@ -32,8 +32,19 @@ class SeedDataTest {
 
     @Test
     fun seedCategoriesCarryIcons() {
-        val all = SeedData.GROUPS.flatMap { it.categories }
-        assertEquals("restaurant", all.first { it.name == "Dining" }.icon)
-        assertEquals("payments", all.first { it.name == "Salary" }.icon)
+        // Assert every seed icon key — these must stay in lock-step with MIGRATION_1_2's backfill,
+        // so a typo in any one is a real (silent, runtime-only) bug worth catching here.
+        val iconsByName = SeedData.GROUPS.flatMap { it.categories }.associate { it.name to it.icon }
+        assertEquals(
+            mapOf(
+                "Salary" to "payments",
+                "Rent" to "home",
+                "Electricity" to "bolt",
+                "Groceries" to "shopping_cart",
+                "Transport" to "directions_car",
+                "Dining" to "restaurant",
+            ),
+            iconsByName,
+        )
     }
 }
