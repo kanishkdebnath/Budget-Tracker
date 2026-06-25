@@ -34,6 +34,26 @@ object ExportManager {
         return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
     }
 
+    /** Generates a focused transaction-journal file (Log export) and returns a shareable URI. */
+    fun export(
+        context: Context,
+        bundle: LogExportBundle,
+        format: ExportFormat,
+        now: Long,
+        zone: ZoneId = ZoneId.systemDefault(),
+    ): Uri {
+        val dir = File(context.cacheDir, "exports").apply { mkdirs() }
+        val file = when (format) {
+            ExportFormat.EXCEL -> File(dir, "budget-${bundle.month}-log.xlsx").also { f ->
+                f.outputStream().use { LogExcelExporter.write(bundle, zone, it) }
+            }
+            ExportFormat.PDF -> File(dir, "budget-${bundle.month}-log.pdf").also { f ->
+                f.outputStream().use { LogPdfExporter.write(bundle, zone, now, it) }
+            }
+        }
+        return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+    }
+
     fun shareIntent(uri: Uri, format: ExportFormat): Intent =
         Intent(Intent.ACTION_SEND).apply {
             type = format.mimeType

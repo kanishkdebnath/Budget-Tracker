@@ -12,9 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,6 +31,7 @@ import com.example.budgettracker.export.ExportManager
 import com.example.budgettracker.ui.AppViewModelProvider
 import com.example.budgettracker.ui.components.BudgetCard
 import com.example.budgettracker.ui.components.cardEntrance
+import com.example.budgettracker.ui.components.ExportSheet
 import com.example.budgettracker.ui.components.GradientButton
 import com.example.budgettracker.ui.components.GradientButtonTone
 import com.example.budgettracker.ui.components.NetBand
@@ -91,43 +90,13 @@ fun ReportScreen(
 
     if (exportSheetOpen) {
         ExportSheet(
-            monthLabel = MonthUtils.monthLabel(month),
+            title = "Export ${MonthUtils.monthLabel(month)}",
+            description = "Share this month's transactions (Excel) or the target-vs-actual summary (PDF).",
             enabled = exportBundle != null,
-            onExport = { format -> onExport(format); onExportSheetClose() },
+            onExcel = { onExport(ExportFormat.EXCEL); onExportSheetClose() },
+            onPdf = { onExport(ExportFormat.PDF); onExportSheetClose() },
             onDismiss = onExportSheetClose,
         )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ExportSheet(
-    monthLabel: String,
-    enabled: Boolean,
-    onExport: (ExportFormat) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column(Modifier.padding(16.dp).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("Export $monthLabel", style = MaterialTheme.typography.titleLarge)
-            Text(
-                "Share this month's transactions (Excel) or the target-vs-actual summary (PDF).",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                GradientButton(
-                    "Excel", onClick = { onExport(ExportFormat.EXCEL) }, enabled = enabled,
-                    tone = GradientButtonTone.TONAL, modifier = Modifier.weight(1f),
-                )
-                GradientButton(
-                    "PDF", onClick = { onExport(ExportFormat.PDF) }, enabled = enabled,
-                    tone = GradientButtonTone.TONAL, modifier = Modifier.weight(1f),
-                )
-            }
-            Spacer(Modifier.height(8.dp))
-        }
     }
 }
 

@@ -9,6 +9,8 @@ import com.example.budgettracker.data.entity.TransactionEntity
 import com.example.budgettracker.data.repository.CategoryRepository
 import com.example.budgettracker.data.repository.PreferencesRepository
 import com.example.budgettracker.data.repository.TransactionRepository
+import com.example.budgettracker.export.LogExportBundle
+import com.example.budgettracker.export.buildExportTxnRows
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -16,6 +18,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -143,6 +146,22 @@ class LogViewModel(
     ) { txns, cats, groups, filter ->
         buildLogState(txns, cats.associateBy { it.id }, groups.associateBy { it.id }, filter, zoneId)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), LogUiState.EMPTY)
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val exportBundle: StateFlow<LogExportBundle?> = combine(
+        month.filterNotNull().flatMapLatest { m ->
+            transactionRepository.observeMonth(m, zoneId).map { m to it }
+        },
+        categoryRepository.observeCategories(includeArchived = true),
+        categoryRepository.observeGroups(includeArchived = true),
+        currency,
+    ) { (m, txns), cats, groups, cur ->
+        LogExportBundle(
+            month = m,
+            currency = cur,
+            transactions = buildExportTxnRows(txns, cats.associateBy { it.id }, groups.associateBy { it.id }),
+        )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     fun setMonth(value: String) { month.value = value }
     fun setFilter(value: TxnFilter) { _filter.value = value }
