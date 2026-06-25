@@ -29,16 +29,22 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.budgettracker.domain.time.MonthUtils
+import com.example.budgettracker.export.ExportFormat
+import com.example.budgettracker.export.ExportManager
 import com.example.budgettracker.ui.AppViewModelProvider
 import com.example.budgettracker.ui.components.EmptyState
+import com.example.budgettracker.ui.components.ExportSheet
 import com.example.budgettracker.ui.components.GradientFab
 import com.example.budgettracker.ui.components.cardEntrance
 import com.example.budgettracker.ui.components.NetBand
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.ZoneId
 
 @Composable
@@ -46,6 +52,8 @@ fun LogScreen(
     month: String,
     onMonthChange: (String) -> Unit,
     modifier: Modifier = Modifier,
+    exportSheetOpen: Boolean = false,
+    onExportSheetClose: () -> Unit = {},
     viewModel: LogViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     LaunchedEffect(month) { viewModel.setMonth(month) }
@@ -54,10 +62,24 @@ fun LogScreen(
     val filter by viewModel.filter.collectAsStateWithLifecycle()
     val currency by viewModel.currency.collectAsStateWithLifecycle()
     val categories by viewModel.liveCategories.collectAsStateWithLifecycle()
+    val exportBundle by viewModel.exportBundle.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     var showSheet by remember { mutableStateOf(false) }
     var editingRow by remember { mutableStateOf<TxnRow?>(null) }
+
+    val onExport: (ExportFormat) -> Unit = { format ->
+        val bundle = exportBundle
+        if (bundle != null) {
+            scope.launch {
+                val uri = withContext(Dispatchers.IO) {
+                    ExportManager.export(context, bundle, format, now = System.currentTimeMillis())
+                }
+                context.startActivity(android.content.Intent.createChooser(ExportManager.shareIntent(uri, format), "Share"))
+            }
+        }
+    }
 
     Scaffold(
         modifier = modifier,
@@ -100,6 +122,17 @@ fun LogScreen(
                 }
             }
         }
+    }
+
+    if (exportSheetOpen) {
+        ExportSheet(
+            title = "Export ${MonthUtils.monthLabel(month)}",
+            description = "Share this month's individual transactions as a formatted log.",
+            enabled = exportBundle != null,
+            onExcel = { onExport(ExportFormat.EXCEL); onExportSheetClose() },
+            onPdf = { onExport(ExportFormat.PDF); onExportSheetClose() },
+            onDismiss = onExportSheetClose,
+        )
     }
 
     if (showSheet) {

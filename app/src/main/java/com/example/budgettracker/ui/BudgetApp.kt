@@ -89,6 +89,7 @@ private fun MainPager(onOpenSettings: () -> Unit) {
     }
     var categoriesSearchActive by rememberSaveable { mutableStateOf(false) }
     var reportExportOpen by rememberSaveable { mutableStateOf(false) }
+    var logExportOpen by rememberSaveable { mutableStateOf(false) }
 
     // Back glides to Log; on Log it's disabled so the system default exits the app (WhatsApp-style).
     BackHandler(enabled = pagerState.currentPage != 0) {
@@ -106,7 +107,11 @@ private fun MainPager(onOpenSettings: () -> Unit) {
                     onPreviousMonth = { month = YearMonth.parse(month).minusMonths(1).toString() },
                     onNextMonth = { month = YearMonth.parse(month).plusMonths(1).toString() },
                     onSettings = onOpenSettings,
-                    onExport = if (current == TopLevelDest.REPORT) ({ reportExportOpen = true }) else null,
+                    onExport = when (current) {
+                        TopLevelDest.REPORT -> ({ reportExportOpen = true })
+                        TopLevelDest.LOG -> ({ logExportOpen = true })
+                        else -> null
+                    },
                 )
                 TopLevelDest.CATEGORIES -> SectionTopBar(
                     "Categories", onOpenSettings,
@@ -132,7 +137,12 @@ private fun MainPager(onOpenSettings: () -> Unit) {
             key = { pages[it].route },
         ) { page ->
             when (pages[page]) {
-                TopLevelDest.LOG -> LogScreen(month = month, onMonthChange = { month = it })
+                TopLevelDest.LOG -> LogScreen(
+                    month = month,
+                    onMonthChange = { month = it },
+                    exportSheetOpen = logExportOpen,
+                    onExportSheetClose = { logExportOpen = false },
+                )
                 TopLevelDest.PLAN -> PlanScreen(month)
                 TopLevelDest.REPORT -> ReportScreen(
                     month,

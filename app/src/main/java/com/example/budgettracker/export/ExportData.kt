@@ -18,6 +18,13 @@ data class ExportTxnRow(
 
 data class ExportRecurringRow(val label: String, val dayOfMonth: Int, val amount: Long, val applied: Boolean)
 
+/** Focused transaction-journal bundle for the Log export (Excel + PDF). */
+data class LogExportBundle(
+    val month: String,
+    val currency: String,
+    val transactions: List<ExportTxnRow>,
+)
+
 /** Everything the Excel/PDF exporters need for one month. */
 data class ExportBundle(
     val month: String,
