@@ -79,4 +79,39 @@ class LogStateTest {
         val state = buildLogState(listOf(txn), mapOf(1L to category), mapOf(1L to group), TxnFilter.ALL, ZoneId.of("UTC"))
         assertEquals("restaurant", state.sections.first().rows.first().iconKey)
     }
+
+    @Test fun categoryFilterNarrowsSectionsButNotTotals() {
+        val txns = listOf(
+            txn(1, 1, 500_000, "2026-06-01T10:00:00Z"),
+            txn(2, 2, 200_000, "2026-06-02T10:00:00Z"),
+        )
+        val state = buildLogState(txns, cats, groups, TxnFilter.ALL, utc, categoryId = 1L)
+        // NetBand totals reflect full month regardless of category filter
+        assertEquals(500_000L, state.income)
+        assertEquals(200_000L, state.expense)
+        // Sections contain only the selected category's transaction
+        assertEquals(1, state.sections.sumOf { it.rows.size })
+        assertEquals("C1", state.sections.single().rows.single().categoryName)
+    }
+
+    @Test fun categoryAndKindFiltersStack() {
+        val txns = listOf(
+            txn(1, 1, 500_000, "2026-06-01T10:00:00Z"),  // INCOME, cat 1
+            txn(2, 2, 200_000, "2026-06-02T10:00:00Z"),  // EXPENSE, cat 2
+        )
+        // categoryId=1 (INCOME cat) + EXPENSE kind filter → zero section rows, totals still full month
+        val state = buildLogState(txns, cats, groups, TxnFilter.EXPENSE, utc, categoryId = 1L)
+        assertEquals(0, state.sections.sumOf { it.rows.size })
+        assertEquals(500_000L, state.income)
+        assertEquals(200_000L, state.expense)
+    }
+
+    @Test fun nullCategoryIdShowsAllTransactions() {
+        val txns = listOf(
+            txn(1, 1, 500_000, "2026-06-01T10:00:00Z"),
+            txn(2, 2, 200_000, "2026-06-02T10:00:00Z"),
+        )
+        val state = buildLogState(txns, cats, groups, TxnFilter.ALL, utc, categoryId = null)
+        assertEquals(2, state.sections.sumOf { it.rows.size })
+    }
 }

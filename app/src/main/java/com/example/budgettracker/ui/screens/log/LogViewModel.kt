@@ -15,6 +15,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
@@ -75,6 +76,7 @@ fun buildLogState(
     groupsById: Map<Long, CategoryGroup>,
     filter: TxnFilter,
     zone: ZoneId,
+    categoryId: Long? = null,
 ): LogUiState {
     data class Resolved(val txn: TransactionEntity, val category: Category)
     val resolved = transactions.mapNotNull { t -> categoriesById[t.categoryId]?.let { Resolved(t, it) } }
@@ -84,10 +86,11 @@ fun buildLogState(
     val incomeCount = resolved.count { it.category.kind == Kind.INCOME }
     val expenseCount = resolved.count { it.category.kind == Kind.EXPENSE }
 
+    val categoryFiltered = if (categoryId != null) resolved.filter { it.category.id == categoryId } else resolved
     val filtered = when (filter) {
-        TxnFilter.ALL -> resolved
-        TxnFilter.INCOME -> resolved.filter { it.category.kind == Kind.INCOME }
-        TxnFilter.EXPENSE -> resolved.filter { it.category.kind == Kind.EXPENSE }
+        TxnFilter.ALL -> categoryFiltered
+        TxnFilter.INCOME -> categoryFiltered.filter { it.category.kind == Kind.INCOME }
+        TxnFilter.EXPENSE -> categoryFiltered.filter { it.category.kind == Kind.EXPENSE }
     }
 
     val sections = filtered
@@ -130,6 +133,14 @@ class LogViewModel(
     private val _filter = MutableStateFlow(TxnFilter.ALL)
     val filter: StateFlow<TxnFilter> = _filter
 
+    private val _selectedCategoryId = MutableStateFlow<Long?>(null)
+    val selectedCategoryId: StateFlow<Long?> = _selectedCategoryId.asStateFlow()
+
+    val liveGroups: StateFlow<List<CategoryGroup>> = categoryRepository.observeGroups()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    fun selectCategory(id: Long?) { _selectedCategoryId.value = id }
+
     val currency: StateFlow<String> = preferencesRepository.currency
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "INR")
 
@@ -143,8 +154,9 @@ class LogViewModel(
         categoryRepository.observeCategories(includeArchived = true),
         categoryRepository.observeGroups(includeArchived = true),
         _filter,
-    ) { txns, cats, groups, filter ->
-        buildLogState(txns, cats.associateBy { it.id }, groups.associateBy { it.id }, filter, zoneId)
+        _selectedCategoryId,
+    ) { txns, cats, groups, filter, catId ->
+        buildLogState(txns, cats.associateBy { it.id }, groups.associateBy { it.id }, filter, zoneId, catId)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), LogUiState.EMPTY)
 
     @OptIn(ExperimentalCoroutinesApi::class)
