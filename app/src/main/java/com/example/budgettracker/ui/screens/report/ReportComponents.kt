@@ -1,5 +1,6 @@
 package com.example.budgettracker.ui.screens.report
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,8 +14,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.TrackChanges
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -41,8 +45,13 @@ import com.example.budgettracker.ui.components.CategoryIconChip
 import com.example.budgettracker.ui.screens.categories.ColorDot
 import com.example.budgettracker.ui.screens.categories.KindChip
 import com.example.budgettracker.ui.screens.categories.parseHexColor
+import com.example.budgettracker.ui.screens.log.TxnRow
 import com.example.budgettracker.ui.theme.BudgetTheme
 import com.example.budgettracker.ui.theme.money
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 /** The "over by … (n%)" / "under by … (n%)" clause in the generated narrative (§7.3), for emphasis. */
 private val NARRATIVE_EMPHASIS = Regex("""\b(over|under) by [^()]+\(\d+%\)""")
@@ -54,6 +63,7 @@ private val NARRATIVE_EMPHASIS = Regex("""\b(over|under) by [^()]+\(\d+%\)""")
 private val PLAN_COL = 84.dp
 private val ACTUAL_COL = 72.dp
 private val DELTA_COL = 88.dp
+private val EXPANDED_DATE_FORMAT = DateTimeFormatter.ofPattern("MMM d", Locale.ENGLISH)
 
 @Composable
 fun NarrativeBox(narrative: String, monthLabel: String, modifier: Modifier = Modifier) {
@@ -92,7 +102,14 @@ fun RecurringDueBanner(count: Int, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun ReportGroupCard(report: GroupReport, currency: String, modifier: Modifier = Modifier) {
+fun ReportGroupCard(
+    report: GroupReport,
+    currency: String,
+    transactionsByCategoryId: Map<Long, List<TxnRow>>,
+    expandedCategoryId: Long?,
+    onToggle: (Long) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     BudgetCard(modifier) {
         Column(Modifier.padding(vertical = 4.dp)) {
             Row(
@@ -114,58 +131,129 @@ fun ReportGroupCard(report: GroupReport, currency: String, modifier: Modifier = 
                     DeltaPill(report.actualSubtotal - report.targetSubtotal, report.kind, currency)
                 }
             }
-            report.rows.forEach { row -> ReportRow(row, currency, report.group.color) }
+            report.rows.forEach { row ->
+                ReportRow(
+                    row = row,
+                    currency = currency,
+                    groupColor = report.group.color,
+                    transactions = transactionsByCategoryId[row.category.id].orEmpty(),
+                    isExpanded = expandedCategoryId == row.category.id,
+                    onToggle = { onToggle(row.category.id) },
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun ReportRow(row: CategoryReportRow, currency: String, groupColor: String) {
+private fun ReportRow(
+    row: CategoryReportRow,
+    currency: String,
+    groupColor: String,
+    transactions: List<TxnRow>,
+    isExpanded: Boolean,
+    onToggle: () -> Unit,
+) {
     val density = BudgetTheme.density
+    val expandable = transactions.isNotEmpty()
+    Column {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .then(if (expandable) Modifier.clickable(onClick = onToggle) else Modifier)
+                .heightIn(min = density.rowMinHeight)
+                .padding(horizontal = 16.dp, vertical = density.rowPaddingVertical),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            CategoryIconChip(
+                row.category.icon,
+                row.category.color?.let { parseHexColor(it) } ?: parseHexColor(groupColor),
+                size = 26.dp,
+            )
+            Spacer(Modifier.width(10.dp))
+            Text(
+                row.category.name,
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.bodyLarge,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Spacer(Modifier.width(6.dp))
+            // Plan: muted, prefixed with the ◎ target glyph (design "ta-row .num.target").
+            Row(Modifier.width(PLAN_COL), horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    Icons.Outlined.TrackChanges,
+                    contentDescription = null,
+                    modifier = Modifier.size(12.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    Money.format(row.target, currency),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Text(
+                Money.format(row.actual, currency),
+                modifier = Modifier.width(ACTUAL_COL),
+                style = MaterialTheme.typography.money,
+                textAlign = TextAlign.Start,
+            )
+            Box(Modifier.width(DELTA_COL), contentAlignment = Alignment.CenterEnd) {
+                if (expandable) {
+                    Icon(
+                        if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                        contentDescription = if (isExpanded) "Collapse transactions" else "Expand transactions",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                } else {
+                    DeltaPill(row.delta, row.category.kind, currency)
+                }
+            }
+        }
+        if (isExpanded && expandable) {
+            HorizontalDivider(Modifier.padding(horizontal = 16.dp))
+            transactions.forEach { txn -> TxnExpandedRow(txn, currency) }
+            Spacer(Modifier.height(8.dp))
+        }
+    }
+}
+
+@Composable
+private fun TxnExpandedRow(txn: TxnRow, currency: String) {
     Row(
-        Modifier.fillMaxWidth()
-            .heightIn(min = density.rowMinHeight)
-            .padding(horizontal = 16.dp, vertical = density.rowPaddingVertical),
+        Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        CategoryIconChip(
-            row.category.icon,
-            row.category.color?.let { parseHexColor(it) } ?: parseHexColor(groupColor),
-            size = 26.dp,
-        )
-        Spacer(Modifier.width(10.dp))
         Text(
-            row.category.name,
-            modifier = Modifier.weight(1f),
-            style = MaterialTheme.typography.bodyLarge,
+            Instant.ofEpochMilli(txn.date)
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate()
+                .format(EXPANDED_DATE_FORMAT),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.width(44.dp),
+        )
+        Text(
+            txn.note?.takeIf { it.isNotBlank() } ?: txn.categoryName,
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 8.dp),
+            style = MaterialTheme.typography.bodyMedium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
-        Spacer(Modifier.width(6.dp))
-        // Plan: muted, prefixed with the ◎ target glyph (design "ta-row .num.target").
-        Row(Modifier.width(PLAN_COL), horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                Icons.Outlined.TrackChanges,
-                contentDescription = null,
-                modifier = Modifier.size(12.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(Modifier.width(4.dp))
-            Text(
-                Money.format(row.target, currency),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
         Text(
-            Money.format(row.actual, currency),
-            modifier = Modifier.width(ACTUAL_COL),
+            Money.formatShort(txn.amount, currency),
             style = MaterialTheme.typography.money,
-            textAlign = TextAlign.Start,
+            color = if (txn.kind == Kind.INCOME)
+                BudgetTheme.semanticColors.income
+            else
+                MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Box(Modifier.width(DELTA_COL), contentAlignment = Alignment.CenterEnd) {
-            DeltaPill(row.delta, row.category.kind, currency)
-        }
     }
 }
 

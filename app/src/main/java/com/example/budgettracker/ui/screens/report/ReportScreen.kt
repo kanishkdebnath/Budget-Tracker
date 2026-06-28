@@ -17,7 +17,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -67,6 +70,8 @@ fun ReportScreen(
         }
     }
 
+    var expandedCategoryId by remember { mutableStateOf<Long?>(null) }
+
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
@@ -83,7 +88,14 @@ fun ReportScreen(
             item { RecurringDueBanner(state.recurringDueCount) }
         }
         itemsIndexed(state.data.groups, key = { _, it -> it.group.id }) { index, group ->
-            ReportGroupCard(group, state.currency, Modifier.cardEntrance(index, month))
+            ReportGroupCard(
+                report = group,
+                currency = state.currency,
+                transactionsByCategoryId = state.transactionsByCategoryId,
+                expandedCategoryId = expandedCategoryId,
+                onToggle = { id -> expandedCategoryId = if (expandedCategoryId == id) null else id },
+                modifier = Modifier.cardEntrance(index, month),
+            )
         }
         item { ExportCard(enabled = exportBundle != null, onExport = onExport) }
     }
