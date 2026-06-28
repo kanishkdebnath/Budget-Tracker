@@ -62,6 +62,9 @@ fun LogScreen(
     val filter by viewModel.filter.collectAsStateWithLifecycle()
     val currency by viewModel.currency.collectAsStateWithLifecycle()
     val categories by viewModel.liveCategories.collectAsStateWithLifecycle()
+    val selectedCategoryId by viewModel.selectedCategoryId.collectAsStateWithLifecycle()
+    val groups by viewModel.liveGroups.collectAsStateWithLifecycle()
+    var showCategoryPicker by remember { mutableStateOf(false) }
     val exportBundle by viewModel.exportBundle.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -99,6 +102,13 @@ fun LogScreen(
             NetBand(uiState.income, uiState.expense, uiState.net, currency, Modifier.padding(horizontal = 16.dp))
             Spacer(Modifier.height(12.dp))
             LogFilterChips(filter, uiState.incomeCount, uiState.expenseCount, viewModel::setFilter)
+            Spacer(Modifier.height(4.dp))
+            CategoryChipRow(
+                selectedCategoryId = selectedCategoryId,
+                categories = categories,
+                onChipClick = { showCategoryPicker = true },
+                onClear = { viewModel.selectCategory(null) },
+            )
             Spacer(Modifier.height(8.dp))
             if (uiState.sections.isEmpty()) {
                 EmptyState(
@@ -122,6 +132,15 @@ fun LogScreen(
                 }
             }
         }
+    }
+
+    if (showCategoryPicker) {
+        CategoryFilterSheet(
+            categories = categories,
+            groups = groups,
+            onSelect = { viewModel.selectCategory(it) },
+            onDismiss = { showCategoryPicker = false },
+        )
     }
 
     if (exportSheetOpen) {
