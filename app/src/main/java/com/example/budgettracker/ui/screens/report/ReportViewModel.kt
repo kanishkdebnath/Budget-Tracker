@@ -2,6 +2,8 @@ package com.example.budgettracker.ui.screens.report
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.budgettracker.data.entity.Category
+import com.example.budgettracker.data.entity.CategoryGroup
 import com.example.budgettracker.data.entity.Target
 import com.example.budgettracker.data.entity.TransactionEntity
 import com.example.budgettracker.data.repository.CategoryRepository
@@ -14,6 +16,7 @@ import com.example.budgettracker.domain.report.ReportTotals
 import com.example.budgettracker.domain.report.aggregateReport
 import com.example.budgettracker.domain.report.generateNarrative
 import com.example.budgettracker.export.ExportBundle
+import com.example.budgettracker.ui.screens.log.TxnRow
 import com.example.budgettracker.export.buildExportRecurringRows
 import com.example.budgettracker.export.buildExportTxnRows
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -26,16 +29,46 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import java.time.ZoneId
 
+fun buildCategoryTxnMap(
+    transactions: List<TransactionEntity>,
+    categoriesById: Map<Long, Category>,
+    groupsById: Map<Long, CategoryGroup>,
+): Map<Long, List<TxnRow>> =
+    transactions
+        .mapNotNull { txn ->
+            val cat = categoriesById[txn.categoryId] ?: return@mapNotNull null
+            val group = groupsById[cat.groupId]
+            TxnRow(
+                id = txn.id,
+                categoryId = cat.id,
+                categoryName = cat.name,
+                groupName = group?.name ?: "",
+                leadingColor = cat.color ?: group?.color ?: "#64748b",
+                iconKey = cat.icon,
+                kind = cat.kind,
+                amount = txn.amount,
+                note = txn.description,
+                date = txn.date,
+            )
+        }
+        .groupBy { it.categoryId }
+        .mapValues { (_, rows) -> rows.sortedByDescending { it.date } }
+
 data class ReportUiState(
     val data: ReportData,
     val narrative: String,
     val recurringDueCount: Int,
     val currency: String,
     val loaded: Boolean,
+    val transactionsByCategoryId: Map<Long, List<TxnRow>> = emptyMap(),
 ) {
     companion object {
         val EMPTY = ReportUiState(
-            ReportData(emptyList(), ReportTotals(0, 0), ReportTotals(0, 0)), "", 0, "INR", loaded = false,
+            data = ReportData(emptyList(), ReportTotals(0, 0), ReportTotals(0, 0)),
+            narrative = "",
+            recurringDueCount = 0,
+            currency = "INR",
+            loaded = false,
         )
     }
 }
@@ -72,7 +105,16 @@ class ReportViewModel(
         val data = aggregateReport(scoped.transactions, scoped.targets, categories, groups)
         val narrative = generateNarrative(scoped.month, data, currency, scoped.transactions.isNotEmpty())
         val dueCount = recurring.count { it.active && it.lastRunMonth != scoped.month }
-        ReportUiState(data, narrative, dueCount, currency, loaded = true)
+        val catsById = categories.associateBy { it.id }
+        val groupsById = groups.associateBy { it.id }
+        ReportUiState(
+            data = data,
+            narrative = narrative,
+            recurringDueCount = dueCount,
+            currency = currency,
+            loaded = true,
+            transactionsByCategoryId = buildCategoryTxnMap(scoped.transactions, catsById, groupsById),
+        )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ReportUiState.EMPTY)
 
     /** Full data bundle for Excel/PDF export (§8). Null until a month's data has loaded. */
